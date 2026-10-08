@@ -38,6 +38,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Choose a dress style first." }, { status: 400 });
     }
 
+    const supabase = getServiceClient();
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Design session is missing." }, { status: 400 });
+    }
+
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentGenerations } = await supabase
+      .from("ai_generations")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_session_id", sessionId)
+      .gte("created_at", since);
+
+    if ((recentGenerations ?? 0) >= 3) {
+      return NextResponse.json(
+        { error: "This design session has reached the daily generation limit. Please try again tomorrow." },
+        { status: 429 },
+      );
+    }
+
     const apiKey = process.env.AI_PROVIDER_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "AI image generation is not configured yet." }, { status: 503 });
@@ -88,7 +108,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "The AI provider returned no designs." }, { status: 502 });
     }
 
-    const supabase = getServiceClient();
     const sourcePath = `sessions/${sessionId || "anonymous"}/fabric-${Date.now()}.webp`;
 
     const fabricBuffer = Buffer.from(await fabric.arrayBuffer());
