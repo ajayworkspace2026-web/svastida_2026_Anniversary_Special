@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap");
 
 :root {
   --background: #ffffff;
@@ -11,8 +10,8 @@
 }
 
 @theme inline {
-  --font-sans: "DM Sans", sans-serif;
-  --font-display: "Cormorant Garamond", serif;
+  --font-sans: var(--font-body-local), "DM Sans", sans-serif;
+  --font-display: var(--font-display-local), "Cormorant Garamond", serif;
 }
 
 * { box-sizing: border-box; }
