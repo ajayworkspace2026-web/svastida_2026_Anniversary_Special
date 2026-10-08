@@ -27,12 +27,6 @@ export default function StorefrontNav() {
 
         <div className="flex items-center gap-3">
           <CartLink />
-          <Link
-            href="/admin/login"
-            className="rounded-full border border-black/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors hover:border-black hover:bg-black hover:text-white"
-          >
-            Admin Panel
-          </Link>
           <MobileMenu />
         </div>
       </div>
