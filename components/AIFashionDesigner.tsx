@@ -12,6 +12,8 @@ export default function AIFashionDesigner() {
   const { add } = useCart();
   const [fabric, setFabric] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState("");
+
   const [dressType, setDressType] = useState(styles[0]);
   const [sleeve, setSleeve] = useState(sleeves[1]);
   const [neckline, setNeckline] = useState(necklines[0]);
@@ -21,6 +23,13 @@ export default function AIFashionDesigner() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("svastida-ai-session");
+    const current = stored || crypto.randomUUID();
+    window.localStorage.setItem("svastida-ai-session", current);
+    setSessionId(current);
+  }, []);
 
   useEffect(() => {
     if (!fabric) {
@@ -51,7 +60,12 @@ export default function AIFashionDesigner() {
       form.append("dressType", dressType);
       form.append("sleeve", sleeve);
       form.append("neckline", neckline);
-      form.append("sessionId", crypto.randomUUID());
+      const stableSessionId = sessionId || crypto.randomUUID();
+      if (!sessionId) {
+        setSessionId(stableSessionId);
+        window.localStorage.setItem("svastida-ai-session", stableSessionId);
+      }
+      form.append("sessionId", stableSessionId);
 
       const response = await fetch("/api/ai/design", { method: "POST", body: form });
       const result = (await response.json()) as {
