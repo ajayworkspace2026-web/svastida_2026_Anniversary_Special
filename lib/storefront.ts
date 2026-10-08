@@ -96,11 +96,58 @@ export async function getCollections() {
   return rows ?? [];
 }
 
-export async function getCollectionProducts(slug: string) {
-  const rows = await rest<ProductRow[]>(
+export async function getCollectionProducts(
+  slug: string,
+  options: { page?: number; q?: string; sort?: string } = {},
+) {
+  const pageSize = 12;
+  const page = Math.max(1, options.page ?? 1);
+  const offset = (page - 1) * pageSize;
+  const sort =
+    options.sort === "price-asc"
+      ? "price.asc"
+      : options.sort === "price-desc"
+        ? "price.desc"
+        : "created_at.desc";
+
+  const search = options.q?.trim()
+    ? "&name=ilike.*" + encodeURIComponent(options.q.trim()) + "*"
+    : "";
+
+  const query =
     "products?select=id,slug,name,description,price,sale_price,featured,new_arrival,bestseller,custom_fit,sizes,status,product_images(storage_path,is_primary),collections!inner(slug)&status=eq.active&collections.slug=eq." +
-      encodeURIComponent(slug) +
-      "&order=created_at.desc",
+    encodeURIComponent(slug) +
+    search +
+    "&order=" +
+    sort +
+    "&offset=" +
+    offset +
+    "&limit=" +
+    pageSize;
+
+  const result = await rest<ProductRow[]>(query);
+  const items = result?.map(mapProduct) ?? [];
+
+  return {
+    items,
+    page,
+    pageSize,
+    hasNext: items.length === pageSize,
+  };
+}
+
+export async function getSiteSettings() {
+  return rest<{
+    brand_name: string;
+    whatsapp_admin_number: string | null;
+    business_email: string | null;
+    business_phone: string | null;
+    instagram_url: string | null;
+    facebook_url: string | null;
+    address: string | null;
+    about_title: string | null;
+    about_content: string | null;
+  }>("site_settings?select=brand_name,whatsapp_admin_number,business_email,business_phone,instagram_url,facebook_url,address,about_title,about_content&id=eq.true&limit=1").then(
+    (rows) => rows?.[0] ?? null,
   );
-  return rows?.map(mapProduct) ?? [];
 }
