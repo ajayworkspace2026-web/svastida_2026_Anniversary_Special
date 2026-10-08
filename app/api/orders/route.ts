@@ -84,16 +84,34 @@ export async function POST(request: Request) {
     }
 
     const supabase = getServiceClient();
-    const productIds = [...new Set(normalized.map((item) => item.productId))];
+    const productIds = [...new Set(
+      normalized
+        .filter((item) => !item.productId.startsWith("ai:"))
+        .map((item) => item.productId),
+    )];
 
-    const { data: products, error: productError } = await supabase
-      .from("products")
-      .select("id,slug,name,price,sale_price,status,sizes")
-      .in("id", productIds)
-      .eq("status", "active");
+    let products: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      price: number;
+      sale_price: number | null;
+      status: string;
+      sizes: string[];
+    }> = [];
 
-    if (productError || !products || products.length !== productIds.length) {
-      return NextResponse.json({ error: "One or more products are unavailable." }, { status: 409 });
+    if (productIds.length) {
+      const { data, error: productError } = await supabase
+        .from("products")
+        .select("id,slug,name,price,sale_price,status,sizes")
+        .in("id", productIds)
+        .eq("status", "active");
+
+      if (productError || !data || data.length !== productIds.length) {
+        return NextResponse.json({ error: "One or more products are unavailable." }, { status: 409 });
+      }
+
+      products = data;
     }
 
     const byId = new Map(products.map((product) => [product.id, product]));
@@ -180,7 +198,10 @@ export async function POST(request: Request) {
       .select("id,order_number")
       .single();
 
-    if (orderError || !order) throw new Error("Could not create your order.");
+    if (orderError || !order) {
+      await supabase.from("customers").delete().eq("id", customerRow.id);
+      throw new Error("Could not create your order.");
+    }
 
     const { error: itemError } = await supabase
       .from("order_items")
@@ -188,6 +209,7 @@ export async function POST(request: Request) {
 
     if (itemError) {
       await supabase.from("orders").delete().eq("id", order.id);
+      await supabase.from("customers").delete().eq("id", customerRow.id);
       throw new Error("Could not save order items.");
     }
 
@@ -197,13 +219,15 @@ export async function POST(request: Request) {
       .eq("id", true)
       .single();
 
-    const whatsappNumber = String(settings?.whatsapp_admin_number ?? "").replace(/\D/g, "");
+    const whatsappNumber = String(
+      settings?.whatsapp_admin_number ?? process.env.WHATSAPP_ADMIN_NUMBER ?? "",
+    ).replace(/\D/g, "");
     const itemLines = orderItems.map((item, index) =>
       [
         `${index + 1}. ${item.product_name}`,
         `Size: ${item.size_label ?? "Custom"}`,
         `Quantity: ${item.quantity}`,
-        `Unit price: ₹${item.unit_price}`,
+        item.unit_price > 0 ? `Unit price: ₹${item.unit_price}` : "Price: To be confirmed",
         Object.keys(item.measurements ?? {}).length
           ? `Measurements: ${JSON.stringify(item.measurements)}`
           : null,
@@ -238,13 +262,6 @@ export async function POST(request: Request) {
     const whatsappUrl = whatsappNumber
       ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
       : null;
-
-    if (whatsappNumber) {
-      await supabase
-        .from("orders")
-        .update({ whatsapp_sent_at: new Date().toISOString() })
-        .eq("id", order.id);
-    }
 
     return NextResponse.json({
       orderNumber: order.order_number,
