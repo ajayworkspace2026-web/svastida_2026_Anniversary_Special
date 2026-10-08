@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/format";
 
@@ -16,22 +16,22 @@ type Collection = {
 const blank = { id: "", name: "", slug: "", description: "", sortOrder: "0", isActive: true };
 
 export default function CollectionManager() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Collection[]>([]);
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState("");
   const [image, setImage] = useState<File | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     const { data } = await supabase
       .from("collections")
       .select("id,name,slug,description,is_active,sort_order")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
     setRows((data ?? []) as Collection[]);
-  }
+  }, [supabase]);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [load]);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
