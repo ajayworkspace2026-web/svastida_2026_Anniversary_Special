@@ -20,6 +20,7 @@ export default function CollectionManager() {
   const [rows, setRows] = useState<Collection[]>([]);
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState<File | null>(null);
 
   async function load() {
     const { data } = await supabase
@@ -51,8 +52,27 @@ export default function CollectionManager() {
 
       if (response.error) throw response.error;
 
+      if (image) {
+        const row = form.id
+          ? form.id
+          : ((await supabase.from("collections").select("id").eq("slug", payload.slug).single()).data?.id ?? "");
+        if (!row) throw new Error("Collection saved but its image could not be linked.");
+        const ext = image.name.split(".").pop()?.toLowerCase() ?? "webp";
+        const path = `collections/${row}/${crypto.randomUUID()}.${ext}`;
+        const upload = await supabase.storage.from("collection-images").upload(path, image, {
+          contentType: image.type,
+          cacheControl: "31536000",
+          upsert: false,
+        });
+        if (upload.error) throw upload.error;
+        const publicUrl = supabase.storage.from("collection-images").getPublicUrl(path).data.publicUrl;
+        const { error: urlError } = await supabase.from("collections").update({ image_url: publicUrl }).eq("id", row);
+        if (urlError) throw urlError;
+      }
+
       setMessage(form.id ? "Collection updated." : "Collection created.");
       setForm(blank);
+      setImage(null);
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not save collection.");
@@ -75,6 +95,9 @@ export default function CollectionManager() {
           <label className="block text-sm">Slug<input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" /></label>
           <label className="block text-sm">Description<textarea rows={4} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" /></label>
           <label className="block text-sm">Sort order<input type="number" value={form.sortOrder} onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" /></label>
+          <label className="block text-sm">Collection image
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setImage(e.target.files?.[0] ?? null)} className="mt-2 block w-full rounded-xl border border-dashed border-black/15 px-4 py-4 text-sm" />
+          </label>
           <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} /> Visible on storefront</label>
         </div>
         {message ? <p className="mt-5 rounded-xl bg-[#f7f5f0] px-4 py-3 text-sm">{message}</p> : null}
@@ -95,7 +118,7 @@ export default function CollectionManager() {
                 <p className="mt-1 text-xs text-black/40">{row.slug} · order {row.sort_order}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setForm({ id: row.id, name: row.name, slug: row.slug, description: row.description ?? "", sortOrder: String(row.sort_order), isActive: row.is_active })} className="rounded-full border border-black/15 px-4 py-2 text-xs">Edit</button>
+                <button type="button" onClick={() => setForm({ id: row.id, name: row.name, slug: row.slug, description: row.description ?? "", sortOrder: String(row.sort_order), isActive: row.is_active }); setImage(null)} className="rounded-full border border-black/15 px-4 py-2 text-xs">Edit</button>
                 {row.is_active ? <button type="button" onClick={() => archive(row.id)} className="rounded-full border border-black/15 px-4 py-2 text-xs">Hide</button> : null}
               </div>
             </div>
