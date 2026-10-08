@@ -394,6 +394,7 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values
   ('product-images', 'product-images', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif']::text[]),
   ('collection-images', 'collection-images', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif']::text[]),
+  ('ai-uploads', 'ai-uploads', false, 8388608, array['image/jpeg','image/png','image/webp','image/avif']::text[]),
   ('ai-designs', 'ai-designs', true, 10485760, array['image/jpeg','image/png','image/webp','image/avif']::text[])
 on conflict (id) do update set
   public = excluded.public,
@@ -411,7 +412,12 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
-create policy "admins manage ai design assets"
+create policy "public read generated AI designs"
+on storage.objects for select
+to anon, authenticated
+using (bucket_id = 'ai-designs');
+
+create policy "admins manage AI assets"
 on storage.objects for all
 to authenticated
 using (public.is_admin())
