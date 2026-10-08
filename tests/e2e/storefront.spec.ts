@@ -6,10 +6,11 @@ test("home page renders the luxury storefront shell", async ({ page }) => {
   await expect(page.getByRole("link", { name: /SVASTIDA/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Wear what feels like you/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Design with fabric/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Admin Panel/i })).toHaveCount(0);
 });
 
 test("customer can navigate the core pages", async ({ page }) => {
-  for (const path of ["/collections", "/customise", "/about", "/contact", "/cart", "/admin/login"]) {
+  for (const path of ["/collections", "/customise", "/about", "/contact", "/cart", "/sree"]) {
     await page.goto(path);
     await expect(page.locator("body")).not.toContainText("Application error");
     await expect(page.locator("body")).not.toContainText("Unhandled Runtime Error");
@@ -23,6 +24,7 @@ test("mobile navigation opens and closes", async ({ page, isMobile }) => {
   await button.click();
   await expect(page.locator("#mobile-navigation")).toBeVisible();
   await expect(page.getByRole("button", { name: /Close navigation/i })).toBeVisible();
+  await expect(page.locator("#mobile-navigation").getByText(/Admin Panel/i)).toHaveCount(0);
 });
 
 test("cart survives a reload", async ({ page }) => {
@@ -51,4 +53,10 @@ test("AI designer validates missing fabric without breaking the page", async ({ 
   await page.goto("/customise");
   await page.getByRole("button", { name: /Generate 4 design concepts/i }).click();
   await expect(page.getByRole("alert")).toContainText(/upload a fabric image/i);
+});
+
+test("private admin route is not exposed through the storefront", async ({ page }) => {
+  await page.goto("/sree");
+  await expect(page.getByRole("heading", { name: /admin sign in/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Admin Panel/i })).toHaveCount(0);
 });
