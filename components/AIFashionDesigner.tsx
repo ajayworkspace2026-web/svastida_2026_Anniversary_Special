@@ -1,22 +1,38 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useCart } from "@/components/cart/CartProvider";
+import type { CartItem } from "@/lib/types";
 
 const styles = ["Anarkali", "Maxi Dress", "Gown", "Kurti", "Lehenga", "Party Dress"];
 const sleeves = ["Sleeveless", "Short sleeve", "Long sleeve", "Statement sleeve"];
 const necklines = ["Round", "V-neck", "Square", "Sweetheart", "High neck"];
 
 export default function AIFashionDesigner() {
+  const { add } = useCart();
   const [fabric, setFabric] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [dressType, setDressType] = useState(styles[0]);
   const [sleeve, setSleeve] = useState(sleeves[1]);
   const [neckline, setNeckline] = useState(necklines[0]);
+  const [generationId, setGenerationId] = useState<string | null>(null);
   const [outputs, setOutputs] = useState<string[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
-  const preview = useMemo(() => (fabric ? URL.createObjectURL(fabric) : null), [fabric]);
+  useEffect(() => {
+    if (!fabric) {
+      setPreview(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(fabric);
+    setPreview(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [fabric]);
 
   async function generate() {
     if (!fabric) {
@@ -25,6 +41,7 @@ export default function AIFashionDesigner() {
     }
 
     setError("");
+    setNotice("");
     setBusy(true);
     setSelected(null);
 
@@ -37,18 +54,45 @@ export default function AIFashionDesigner() {
       form.append("sessionId", crypto.randomUUID());
 
       const response = await fetch("/api/ai/design", { method: "POST", body: form });
-      const result = (await response.json()) as { outputs?: string[]; error?: string };
+      const result = (await response.json()) as {
+        generationId?: string | null;
+        outputs?: string[];
+        error?: string;
+      };
 
       if (!response.ok || !result.outputs?.length) {
         throw new Error(result.error ?? "No designs were generated.");
       }
 
+      setGenerationId(result.generationId ?? null);
       setOutputs(result.outputs);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not generate designs.");
     } finally {
       setBusy(false);
     }
+  }
+
+  function addSelectedToEnquiry() {
+    if (selected === null || !outputs[selected]) {
+      setError("Choose a design first.");
+      return;
+    }
+
+    const item: CartItem = {
+      productId: `ai:${generationId ?? "custom"}:${selected}`,
+      slug: "ai-custom-design",
+      name: `Custom AI Design — ${dressType}`,
+      unitPrice: 0,
+      quantity: 1,
+      size: null,
+      measurements: {},
+      imageUrl: outputs[selected],
+      aiDesignUrl: outputs[selected],
+    };
+
+    add(item);
+    setNotice("Design added to your enquiry cart. You can submit it with your customer details.");
   }
 
   return (
@@ -96,6 +140,7 @@ export default function AIFashionDesigner() {
         </div>
 
         {error ? <p role="alert" className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p> : null}
+        {notice ? <p className="mt-5 rounded-xl bg-[#f7f5f0] px-4 py-3 text-sm">{notice}</p> : null}
 
         <button
           type="button"
@@ -111,7 +156,7 @@ export default function AIFashionDesigner() {
       </section>
 
       <section>
-        <div className="mb-5 flex items-end justify-between">
+        <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-[var(--gold)]">Concept board</p>
             <h2 className="mt-2 text-4xl">Explore the possibilities.</h2>
@@ -120,19 +165,29 @@ export default function AIFashionDesigner() {
         </div>
 
         {outputs.length ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {outputs.map((url, index) => (
-              <button
-                type="button"
-                key={url}
-                onClick={() => setSelected(index)}
-                className={`group overflow-hidden text-left ${selected === index ? "ring-2 ring-[var(--gold-bright)]" : "ring-1 ring-black/10"}`}
-              >
-                <img src={url} alt={`AI dress concept ${index + 1}`} className="aspect-[2/3] w-full object-cover transition duration-700 group-hover:scale-[1.02]" />
-                <div className="bg-white px-4 py-3 text-sm">Concept {index + 1}</div>
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {outputs.map((url, index) => (
+                <button
+                  type="button"
+                  key={url}
+                  onClick={() => setSelected(index)}
+                  className={`group overflow-hidden text-left ${selected === index ? "ring-2 ring-[var(--gold-bright)]" : "ring-1 ring-black/10"}`}
+                >
+                  <img src={url} alt={`AI dress concept ${index + 1}`} className="aspect-[2/3] w-full object-cover transition duration-700 group-hover:scale-[1.02]" />
+                  <div className="bg-white px-4 py-3 text-sm">Concept {index + 1}</div>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled={selected === null}
+              onClick={addSelectedToEnquiry}
+              className="mt-6 rounded-full border border-black/15 px-6 py-3.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Add selected design to enquiry
+            </button>
+          </>
         ) : (
           <div className="grid min-h-[600px] place-items-center rounded-2xl border border-dashed border-black/15 bg-[#f7f5f0] p-10 text-center">
             <div>
