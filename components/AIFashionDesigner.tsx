@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import type { CartItem } from "@/lib/types";
 
@@ -13,7 +14,6 @@ export default function AIFashionDesigner() {
   const [fabric, setFabric] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState("");
-
   const [dressType, setDressType] = useState(styles[0]);
   const [sleeve, setSleeve] = useState(sleeves[1]);
   const [neckline, setNeckline] = useState(necklines[0]);
@@ -24,24 +24,20 @@ export default function AIFashionDesigner() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem("svastida-ai-session");
-    const current = stored || crypto.randomUUID();
-    window.localStorage.setItem("svastida-ai-session", current);
-    setSessionId(current);
-  }, []);
-
-  useEffect(() => {
-    if (!fabric) {
+  function chooseFabric(file: File | null) {
+    setFabric(file);
+    setError("");
+    if (!file) {
       setPreview(null);
       return;
     }
 
-    const url = URL.createObjectURL(fabric);
-    setPreview(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [fabric]);
+    const url = URL.createObjectURL(file);
+    setPreview((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return url;
+    });
+  }
 
   async function generate() {
     if (!fabric) {
@@ -55,16 +51,18 @@ export default function AIFashionDesigner() {
     setSelected(null);
 
     try {
+      let stableSessionId = sessionId;
+      if (!stableSessionId) {
+        stableSessionId = window.localStorage.getItem("svastida-ai-session") || crypto.randomUUID();
+        window.localStorage.setItem("svastida-ai-session", stableSessionId);
+        setSessionId(stableSessionId);
+      }
+
       const form = new FormData();
       form.append("fabric", fabric);
       form.append("dressType", dressType);
       form.append("sleeve", sleeve);
       form.append("neckline", neckline);
-      const stableSessionId = sessionId || crypto.randomUUID();
-      if (!sessionId) {
-        setSessionId(stableSessionId);
-        window.localStorage.setItem("svastida-ai-session", stableSessionId);
-      }
       form.append("sessionId", stableSessionId);
 
       const response = await fetch("/api/ai/design", { method: "POST", body: form });
@@ -117,7 +115,7 @@ export default function AIFashionDesigner() {
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => setFabric(event.target.files?.[0] ?? null)}
+            onChange={(event) => chooseFabric(event.target.files?.[0] ?? null)}
             className="mt-3 block w-full rounded-xl border border-dashed border-black/20 p-5 text-sm"
           />
         </label>
