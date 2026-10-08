@@ -3,7 +3,7 @@ import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
 import ProductPurchaseForm from "@/components/ProductPurchaseForm";
 import { formatCurrency } from "@/lib/format";
-import { getProductBySlug } from "@/lib/storefront";
+import { getProductBySlug, getSiteSettings } from "@/lib/storefront";
 
 export default async function ProductPage({
   params,
@@ -11,7 +11,10 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, settings] = await Promise.all([
+    getProductBySlug(slug),
+    getSiteSettings(),
+  ]);
 
   if (!product) notFound();
 
@@ -68,6 +71,7 @@ export default async function ProductPage({
                 sizes: product.sizes ?? [],
                 custom_measurements_enabled: Boolean(product.custom_measurements_enabled),
                 imageUrl: primaryImage,
+                whatsappNumber: settings?.whatsapp_admin_number ?? null,
               }}
             />
           </section>
