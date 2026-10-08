@@ -40,13 +40,6 @@ export default function MobileMenu() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin/login"
-              onClick={() => setOpen(false)}
-              className="mt-3 block border-t border-black/10 px-4 pt-4 text-xs uppercase tracking-[0.2em] text-black/45"
-            >
-              Admin
-            </Link>
           </nav>
         </div>
       ) : null}
