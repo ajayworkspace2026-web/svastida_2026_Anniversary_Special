@@ -1,4 +1,4 @@
-import type { ProductListItem } from "@/lib/types";
+import type { ProductDetail, ProductListItem } from "@/lib/types";
 
 type ProductRow = ProductListItem & {
   product_images?: Array<{
@@ -57,7 +57,7 @@ export async function getFeaturedProducts(limit = 8) {
   return rows?.map(mapProduct) ?? [];
 }
 
-export async function getProductBySlug(slug: string) {
+export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
   const query =
     "products?select=id,slug,name,description,price,sale_price,featured,new_arrival,bestseller,custom_fit,sizes,status,custom_measurements_enabled,tags,stock_label,product_images(id,storage_path,alt_text,sort_order,is_primary),size_charts(size_label,bust_min_cm,bust_max_cm,waist_min_cm,waist_max_cm,hips_min_cm,hips_max_cm)&slug=eq." +
     encodeURIComponent(slug) +
@@ -73,12 +73,36 @@ export async function getProductBySlug(slug: string) {
 
   return {
     ...row,
+    price: Number(row.price),
+    sale_price: row.sale_price == null ? null : Number(row.sale_price),
+    featured: Boolean(row.featured),
+    new_arrival: Boolean(row.new_arrival),
+    bestseller: Boolean(row.bestseller),
+    custom_fit: Boolean(row.custom_fit),
+    custom_measurements_enabled: Boolean(row.custom_measurements_enabled),
+    sizes: Array.isArray(row.sizes) ? row.sizes : [],
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    stock_label: row.stock_label ?? null,
     images: images.map((image: any) => ({
-      ...image,
+      id: String(image.id),
+      storage_path: String(image.storage_path),
+      alt_text: image.alt_text ?? null,
+      sort_order: Number(image.sort_order ?? 0),
+      is_primary: Boolean(image.is_primary),
       publicUrl: storagePublicUrl(image.storage_path),
     })),
-    sale_price: row.sale_price ?? null,
-  };
+    size_charts: Array.isArray(row.size_charts)
+      ? row.size_charts.map((chart: any) => ({
+          size_label: String(chart.size_label),
+          bust_min_cm: chart.bust_min_cm == null ? null : Number(chart.bust_min_cm),
+          bust_max_cm: chart.bust_max_cm == null ? null : Number(chart.bust_max_cm),
+          waist_min_cm: chart.waist_min_cm == null ? null : Number(chart.waist_min_cm),
+          waist_max_cm: chart.waist_max_cm == null ? null : Number(chart.waist_max_cm),
+          hips_min_cm: chart.hips_min_cm == null ? null : Number(chart.hips_min_cm),
+          hips_max_cm: chart.hips_max_cm == null ? null : Number(chart.hips_max_cm),
+        }))
+      : [],
+  } as ProductDetail;
 }
 
 export type CollectionSummary = {
