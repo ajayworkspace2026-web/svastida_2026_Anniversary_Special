@@ -99,7 +99,27 @@ export async function POST(request: Request) {
     const byId = new Map(products.map((product) => [product.id, product]));
 
     const orderItems = normalized.map((item) => {
-      const product = byId.get(item.productId)!;
+      const isAiDesign = item.productId.startsWith("ai:");
+      if (isAiDesign) {
+        const aiUrl = item.aiDesignUrl ?? "";
+        const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+        if (!configuredUrl || !aiUrl.startsWith(`${configuredUrl}/storage/v1/object/public/ai-designs/`)) {
+          throw new Error("The selected AI design is invalid.");
+        }
+        return {
+          product_id: null,
+          product_name: "Custom AI Design Enquiry",
+          product_slug: "ai-custom-design",
+          unit_price: 0,
+          quantity: 1,
+          size_label: item.size,
+          measurements: item.measurements,
+          ai_design_url: aiUrl,
+        };
+      }
+
+      const product = byId.get(item.productId);
+      if (!product) throw new Error("A selected product is no longer available.");
       const unitPrice = Number(product.sale_price ?? product.price);
 
       if (Array.isArray(product.sizes) && product.sizes.length > 0) {
