@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/format";
 import type { ProductStatus } from "@/lib/types";
@@ -40,7 +40,7 @@ const emptyForm = {
 };
 
 export default function ProductManager() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [image, setImage] = useState<File | null>(null);
@@ -49,7 +49,7 @@ export default function ProductManager() {
   const [message, setMessage] = useState("");
   const [collections, setCollections] = useState<Array<{ id: string; name: string }>>([]);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from("products")
@@ -59,9 +59,9 @@ export default function ProductManager() {
     const { data: collectionRows } = await supabase.from("collections").select("id,name").order("sort_order", { ascending: true });
     setCollections(collectionRows ?? []);
     setLoading(false);
-  }
+  }, [supabase]);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); }, [load]);
 
   function edit(product: Product) {
     setForm({
