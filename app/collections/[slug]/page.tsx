@@ -2,6 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
+import ProductCard from "@/components/ProductCard";
+import SectionHeading from "@/components/SectionHeading";
+import { getCollectionProducts, getCollections } from "@/lib/storefront";
+
+export async function generateStaticParams() {
+  const collections = await getCollections();
+  return collections.map((collection) => ({ slug: collection.slug }));
+}
 
 export default async function CollectionPage({
   params,
@@ -9,26 +17,38 @@ export default async function CollectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const known = ["new-arrivals", "custom-fit", "occasion"];
-  if (!known.includes(slug)) notFound();
+  const [collections, products] = await Promise.all([
+    getCollections(),
+    getCollectionProducts(slug),
+  ]);
+  const collection = collections.find((item) => item.slug === slug);
+
+  if (!collection) notFound();
 
   return (
     <>
       <StorefrontNav />
       <main className="mx-auto max-w-7xl px-5 py-16 md:px-10 md:py-24">
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Collection</p>
-        <h1 className="mt-4 text-7xl capitalize leading-[0.85]">{slug.replaceAll("-", " ")}</h1>
-        <p className="mt-6 max-w-2xl text-sm leading-7 text-black/55">
-          Published products from this collection will render dynamically here.
-        </p>
-        <div className="mt-12 grid gap-6">
-          <div className="border border-dashed border-black/15 p-12 text-center">
-            <p className="display-font text-3xl">No published products yet.</p>
-            <Link href="/admin/login" className="mt-5 inline-block text-sm underline decoration-[var(--gold)] underline-offset-8">
-              Admin access
-            </Link>
-          </div>
+        <div className="flex flex-col justify-between gap-6 border-b border-black/10 pb-10 md:flex-row md:items-end">
+          <SectionHeading
+            eyebrow="Collection"
+            title={collection.name}
+            description={collection.description ?? undefined}
+          />
+          <Link href="/collections" className="text-sm font-medium underline decoration-[var(--gold)] underline-offset-8">
+            All collections
+          </Link>
         </div>
+
+        {!products.length ? (
+          <div className="py-24 text-center">
+            <p className="display-font text-4xl">Nothing published in this collection yet.</p>
+          </div>
+        ) : (
+          <div className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product) => <ProductCard key={product.id} product={product} />)}
+          </div>
+        )}
       </main>
       <StorefrontFooter />
     </>
