@@ -137,7 +137,7 @@ export async function getCollectionProducts(
 }
 
 export async function getSiteSettings() {
-  return rest<{
+  const rows = await rest<Array<{
     brand_name: string;
     whatsapp_admin_number: string | null;
     business_email: string | null;
@@ -147,7 +147,7 @@ export async function getSiteSettings() {
     address: string | null;
     about_title: string | null;
     about_content: string | null;
-  }>("site_settings?select=brand_name,whatsapp_admin_number,business_email,business_phone,instagram_url,facebook_url,address,about_title,about_content&id=eq.true&limit=1").then(
-    (rows) => rows?.[0] ?? null,
-  );
+  }>>("site_settings?select=brand_name,whatsapp_admin_number,business_email,business_phone,instagram_url,facebook_url,address,about_title,about_content&id=eq.true&limit=1");
+
+  return rows?.[0] ?? null;
 }
