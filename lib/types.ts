@@ -30,3 +30,27 @@ export type CartItem = {
   imageUrl: string | null;
   aiDesignUrl: string | null;
 };
+
+
+export type ProductDetail = ProductListItem & {
+  custom_measurements_enabled: boolean;
+  tags: string[];
+  stock_label: string | null;
+  images: Array<{
+    id: string;
+    storage_path: string;
+    alt_text: string | null;
+    sort_order: number;
+    is_primary: boolean;
+    publicUrl: string | null;
+  }>;
+  size_charts: Array<{
+    size_label: string;
+    bust_min_cm: number | null;
+    bust_max_cm: number | null;
+    waist_min_cm: number | null;
+    waist_max_cm: number | null;
+    hips_min_cm: number | null;
+    hips_max_cm: number | null;
+  }>;
+};
