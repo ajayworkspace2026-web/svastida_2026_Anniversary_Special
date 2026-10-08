@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     const sourcePath = `sessions/${sessionId || "anonymous"}/fabric-${Date.now()}.webp`;
 
     const fabricBuffer = Buffer.from(await fabric.arrayBuffer());
-    await supabase.storage.from("ai-designs").upload(sourcePath, fabricBuffer, {
+    await supabase.storage.from("ai-uploads").upload(sourcePath, fabricBuffer, {
       contentType: fabric.type,
       upsert: false,
     });
