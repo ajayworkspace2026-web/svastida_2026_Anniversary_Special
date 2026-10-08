@@ -333,11 +333,6 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
-create policy "public can create customer records"
-on public.customers for insert
-to anon, authenticated
-with check (true);
-
 create policy "admins read customers"
 on public.customers for select
 to authenticated
@@ -354,11 +349,6 @@ on public.order_items for all
 to authenticated
 using (public.is_admin())
 with check (public.is_admin());
-
-create policy "public can create ai generations"
-on public.ai_generations for insert
-to anon, authenticated
-with check (true);
 
 create policy "admins manage ai generations"
 on public.ai_generations for all
