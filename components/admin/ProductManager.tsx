@@ -61,6 +61,7 @@ export default function ProductManager() {
     setLoading(false);
   }, [supabase]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load(); }, [load]);
 
   function edit(product: Product) {
