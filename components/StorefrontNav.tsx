@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CartLink from "@/components/cart/CartLink";
+import MobileMenu from "@/components/MobileMenu";
 
 const links = [
   { href: "/", label: "Home" },
@@ -18,24 +19,18 @@ export default function StorefrontNav() {
 
         <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
           {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="transition-colors hover:text-[var(--gold)]"
-            >
+            <Link key={link.href} href={link.href} className="transition-colors hover:text-[var(--gold)]">
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <CartLink />
-          <Link
-            href="/admin/login"
-            className="hidden text-xs uppercase tracking-[0.2em] text-black/45 hover:text-black md:block"
-          >
+          <Link href="/admin/login" className="hidden text-xs uppercase tracking-[0.2em] text-black/45 hover:text-black md:block">
             Admin
           </Link>
+          <MobileMenu />
         </div>
       </div>
     </header>
