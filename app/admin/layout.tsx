@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
 const links = [
   ["/admin", "Overview"],
@@ -30,7 +31,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/" className="display-font text-3xl font-semibold">
           SVASTIDA<span className="text-[var(--gold-bright)]">.</span>
         </Link>
-        <p className="mt-2 text-xs text-black/40">{profile.full_name || user.email}</p>
+        <p className="mt-2 truncate text-xs text-black/40">{profile.full_name || user.email}</p>
         <nav className="mt-12 space-y-1">
           {links.map(([href, label]) => (
             <Link key={href} href={href} className="block rounded-xl px-4 py-3 text-sm text-black/65 transition hover:bg-black hover:text-white">
@@ -41,14 +42,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/" className="absolute bottom-8 left-6 text-xs uppercase tracking-[0.2em] text-black/40 hover:text-black">
           View storefront
         </Link>
+        <AdminLogoutButton />
       </aside>
+
       <div className="lg:pl-64">
         <header className="border-b border-black/10 bg-white px-5 py-5 lg:hidden">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/" className="display-font text-2xl font-semibold">SVASTIDA.</Link>
-            <div className="flex gap-3 overflow-x-auto text-xs">
-              {links.map(([href, label]) => <Link key={href} href={href} className="whitespace-nowrap">{label}</Link>)}
-            </div>
+          <div className="flex items-center gap-4 overflow-x-auto">
+            <Link href="/" className="display-font shrink-0 text-2xl font-semibold">SVASTIDA.</Link>
+            {links.map(([href, label]) => <Link key={href} href={href} className="whitespace-nowrap text-xs">{label}</Link>)}
           </div>
         </header>
         <main className="px-5 py-8 md:px-8 lg:px-10 lg:py-10">{children}</main>
