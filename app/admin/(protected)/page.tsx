@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import StorageDashboard from "@/components/admin/StorageDashboard";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -20,8 +21,9 @@ export default async function AdminDashboard() {
       <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Admin</p>
       <h1 className="mt-3 text-6xl leading-[0.85]">Overview.</h1>
       <p className="mt-4 max-w-2xl text-sm leading-6 text-black/50">
-        Your control centre for the storefront.
+        Your control centre for the storefront, catalogue, customer orders and storage.
       </p>
+
       <div className="mt-10 grid gap-4 md:grid-cols-3">
         {cards.map(([label, value, href]) => (
           <Link key={String(label)} href={String(href)} className="rounded-2xl bg-white p-7 transition hover:-translate-y-0.5">
@@ -30,7 +32,12 @@ export default async function AdminDashboard() {
           </Link>
         ))}
       </div>
-      <div className="mt-10 grid gap-4 md:grid-cols-2">
+
+      <div className="mt-10">
+        <StorageDashboard />
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Link href="/admin/products" className="rounded-2xl bg-black p-8 text-white">
           <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold-bright)]">Catalogue</p>
           <h2 className="mt-3 text-4xl">Manage your products.</h2>
