@@ -19,6 +19,7 @@ type Product = {
   featured: boolean;
   new_arrival: boolean;
   bestseller: boolean;
+  collection_id: string | null;
 };
 
 const emptyForm = {
@@ -35,6 +36,7 @@ const emptyForm = {
   featured: false,
   newArrival: false,
   bestseller: false,
+  collectionId: "",
 };
 
 export default function ProductManager() {
@@ -45,14 +47,17 @@ export default function ProductManager() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [collections, setCollections] = useState<Array<{ id: string; name: string }>>([]);
 
   async function load() {
     setLoading(true);
     const { data } = await supabase
       .from("products")
-      .select("id,slug,name,description,price,sale_price,status,sizes,custom_fit,custom_measurements_enabled,featured,new_arrival,bestseller")
+      .select("id,slug,name,description,price,sale_price,status,sizes,custom_fit,custom_measurements_enabled,featured,new_arrival,bestseller,collection_id")
       .order("created_at", { ascending: false });
     setProducts((data ?? []) as Product[]);
+    const { data: collectionRows } = await supabase.from("collections").select("id,name").order("sort_order", { ascending: true });
+    setCollections(collectionRows ?? []);
     setLoading(false);
   }
 
@@ -73,6 +78,7 @@ export default function ProductManager() {
       featured: product.featured,
       newArrival: product.new_arrival,
       bestseller: product.bestseller,
+      collectionId: product.collection_id ?? "",
     });
     setImage(null);
     setMessage("");
@@ -142,6 +148,7 @@ export default function ProductManager() {
         featured: form.featured,
         new_arrival: form.newArrival,
         bestseller: form.bestseller,
+        collection_id: form.collectionId || null,
       };
 
       let productId = form.id;
@@ -196,6 +203,12 @@ export default function ProductManager() {
           </div>
 
           <label className="block text-sm">Sizes<input value={form.sizes} onChange={(e) => setForm((f) => ({ ...f, sizes: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" placeholder="XS,S,M,L,XL" /></label>
+          <label className="block text-sm">Collection
+            <select value={form.collectionId} onChange={(e) => setForm((f) => ({ ...f, collectionId: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3">
+              <option value="">No collection</option>
+              {collections.map((collection) => <option key={collection.id} value={collection.id}>{collection.name}</option>)}
+            </select>
+          </label>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {[
