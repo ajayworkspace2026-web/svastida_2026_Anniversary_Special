@@ -16,6 +16,7 @@ type ProductPurchaseFormProps = {
     sizes: string[];
     custom_measurements_enabled: boolean;
     imageUrl: string | null;
+    whatsappNumber: string | null;
   };
 };
 
