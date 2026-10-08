@@ -27,6 +27,8 @@ on conflict (id) do update set role = 'admin';
 
 Do not put the service-role key in browser code or GitHub.
 
+Private admin login uses the custom `/sree` route. Configure `SVASTIDA_ADMIN_ID` as `Svastida@2026` and set `SVASTIDA_ADMIN_EMAIL` to the email of the Supabase Auth account whose profile role is `admin`. Set the Supabase Auth password separately; do not commit passwords to GitHub.
+
 ## 3. Storage
 
 The migration creates:
