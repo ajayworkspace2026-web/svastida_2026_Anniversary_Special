@@ -118,7 +118,7 @@ export default function CollectionManager() {
                 <p className="mt-1 text-xs text-black/40">{row.slug} · order {row.sort_order}</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setForm({ id: row.id, name: row.name, slug: row.slug, description: row.description ?? "", sortOrder: String(row.sort_order), isActive: row.is_active }); setImage(null)} className="rounded-full border border-black/15 px-4 py-2 text-xs">Edit</button>
+                <button type="button" onClick={() => { setForm({ id: row.id, name: row.name, slug: row.slug, description: row.description ?? "", sortOrder: String(row.sort_order), isActive: row.is_active }); setImage(null); }} className="rounded-full border border-black/15 px-4 py-2 text-xs">Edit</button>
                 {row.is_active ? <button type="button" onClick={() => archive(row.id)} className="rounded-full border border-black/15 px-4 py-2 text-xs">Hide</button> : null}
               </div>
             </div>
