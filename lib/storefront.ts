@@ -122,7 +122,7 @@ export async function getCollections() {
 
 export async function getCollectionProducts(
   slug: string,
-  options: { page?: number; q?: string; sort?: string } = {},
+  options: { page?: number; q?: string; sort?: string; size?: string; minPrice?: number; maxPrice?: number } = {},
 ) {
   const pageSize = 12;
   const page = Math.max(1, options.page ?? 1);
@@ -137,11 +137,25 @@ export async function getCollectionProducts(
   const search = options.q?.trim()
     ? "&name=ilike.*" + encodeURIComponent(options.q.trim()) + "*"
     : "";
+  const sizeFilter = options.size?.trim()
+    ? "&sizes=cs." + encodeURIComponent(`{${options.size.trim()}}`)
+    : "";
+  const minPrice =
+    options.minPrice !== undefined && Number.isFinite(options.minPrice)
+      ? "&price=gte." + encodeURIComponent(String(Math.max(0, options.minPrice)))
+      : "";
+  const maxPrice =
+    options.maxPrice !== undefined && Number.isFinite(options.maxPrice)
+      ? "&price=lte." + encodeURIComponent(String(Math.max(0, options.maxPrice)))
+      : "";
 
   const query =
     "products?select=id,slug,name,description,price,sale_price,featured,new_arrival,bestseller,custom_fit,sizes,status,product_images(storage_path,is_primary),collections!inner(slug)&status=eq.active&collections.slug=eq." +
     encodeURIComponent(slug) +
     search +
+    sizeFilter +
+    minPrice +
+    maxPrice +
     "&order=" +
     sort +
     "&offset=" +
