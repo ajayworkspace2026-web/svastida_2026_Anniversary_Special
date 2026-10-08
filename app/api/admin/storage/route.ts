@@ -27,6 +27,7 @@ export async function GET() {
     const buckets = [
       ["product-images", "product_image_bytes"],
       ["collection-images", "collection_image_bytes"],
+      ["ai-uploads", "ai_upload_bytes"],
       ["ai-designs", "ai_output_bytes"],
     ] as const;
 
