@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { buildClickToChatUrl, buildOrderMessage, normalizeWhatsAppNumber, sendWhatsAppCloudText } from "@/lib/whatsapp";
 
 type IncomingItem = {
   productId: string;
@@ -222,46 +223,54 @@ export async function POST(request: Request) {
     const whatsappNumber = String(
       settings?.whatsapp_admin_number ?? process.env.WHATSAPP_ADMIN_NUMBER ?? "",
     ).replace(/\D/g, "");
-    const itemLines = orderItems.map((item, index) =>
-      [
-        `${index + 1}. ${item.product_name}`,
-        `Size: ${item.size_label ?? "Custom"}`,
-        `Quantity: ${item.quantity}`,
-        item.unit_price > 0 ? `Unit price: ₹${item.unit_price}` : "Price: To be confirmed",
-        Object.keys(item.measurements ?? {}).length
-          ? `Measurements: ${JSON.stringify(item.measurements)}`
-          : null,
-        item.ai_design_url ? `AI design: ${item.ai_design_url}` : null,
-      ].filter(Boolean).join("\n"),
+    const message = buildOrderMessage({
+      brandName: settings?.brand_name ?? "Svastida",
+      orderNumber: order.order_number,
+      customer: {
+        name: clean(customer.name, 120),
+        phone: clean(customer.phone, 30),
+        whatsappPhone: clean(customer.whatsappPhone, 30),
+        addressLine1: clean(customer.addressLine1, 250),
+        addressLine2: clean(customer.addressLine2, 250),
+        city: clean(customer.city, 100),
+        state: clean(customer.state, 100),
+        pincode: clean(customer.pincode, 20),
+        customerNotes: clean(customer.customerNotes, 1000),
+      },
+      items: orderItems.map((item) => ({
+        productName: item.product_name,
+        size: item.size_label,
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        measurements: item.measurements,
+        aiDesignUrl: item.ai_design_url,
+      })),
+      total: subtotal,
+    });
+
+    const adminWhatsapp = normalizeWhatsAppNumber(
+      settings?.whatsapp_admin_number ?? process.env.WHATSAPP_ADMIN_NUMBER ?? "",
     );
+    const whatsappUrl = buildClickToChatUrl(adminWhatsapp, message);
 
-    const message = [
-      `NEW ORDER REQUEST — ${settings?.brand_name ?? "Svastida"}`,
-      "",
-      `Order ID: ${order.order_number}`,
-      "",
-      "CUSTOMER",
-      `Name: ${clean(customer.name, 120)}`,
-      `Phone: ${clean(customer.phone, 30)}`,
-      `WhatsApp: ${clean(customer.whatsappPhone, 30)}`,
-      "",
-      "DELIVERY",
-      `Address: ${clean(customer.addressLine1, 250)}`,
-      clean(customer.addressLine2, 250) ? `Landmark: ${clean(customer.addressLine2, 250)}` : null,
-      `${clean(customer.city, 100)}, ${clean(customer.state, 100)} — ${clean(customer.pincode, 20)}`,
-      "",
-      "ITEMS",
-      ...itemLines,
-      "",
-      `TOTAL: ₹${subtotal}`,
-      clean(customer.customerNotes, 1000) ? `Customer note: ${clean(customer.customerNotes, 1000)}` : null,
-      "",
-      "Please contact the customer to confirm this order.",
-    ].filter(Boolean).join("\n");
-
-    const whatsappUrl = whatsappNumber
-      ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
-      : null;
+    if (adminWhatsapp && process.env.WHATSAPP_ACCESS_TOKEN) {
+      const apiResult = await sendWhatsAppCloudText(adminWhatsapp, message);
+      if (apiResult.sent) {
+        await supabase
+          .from("orders")
+          .update({
+            whatsapp_api_sent_at: new Date().toISOString(),
+            whatsapp_api_message_id: apiResult.messageId ?? null,
+            whatsapp_api_error: null,
+          })
+          .eq("id", order.id);
+      } else if (apiResult.error && apiResult.error !== "WhatsApp Cloud API is not configured.") {
+        await supabase
+          .from("orders")
+          .update({ whatsapp_api_error: apiResult.error })
+          .eq("id", order.id);
+      }
+    }
 
     return NextResponse.json({
       orderNumber: order.order_number,
