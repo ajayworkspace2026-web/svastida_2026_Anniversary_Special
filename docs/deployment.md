@@ -46,7 +46,7 @@ Only `NEXT_PUBLIC_*` variables are intended for the browser.
 ## 3. First production setup
 
 1. Open the deployed site.
-2. Sign in at `/admin/login`.
+2. Sign in at `/sree`.
 3. Confirm the administrator can open the protected dashboard.
 4. Configure the brand/contact/about settings.
 5. Create at least one collection.
@@ -54,7 +54,7 @@ Only `NEXT_PUBLIC_*` variables are intended for the browser.
 7. Open that product from the customer storefront.
 8. Add the product to cart.
 9. Submit a test enquiry.
-10. Confirm the order appears in `/admin/orders`.
+10. Confirm the order appears in `/sree/orders`.
 11. Confirm the WhatsApp click-to-chat message contains the order number and item details.
 12. Test the AI designer only after the AI provider key is configured.
 
