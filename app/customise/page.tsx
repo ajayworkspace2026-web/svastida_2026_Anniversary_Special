@@ -1,16 +1,32 @@
+import StorefrontNav from "@/components/StorefrontNav";
+import StorefrontFooter from "@/components/StorefrontFooter";
+import AIFashionDesigner from "@/components/AIFashionDesigner";
+
 export default function CustomisePage() {
   return (
-    <main className="min-h-screen px-6 py-20 md:px-12">
-      <div className="mx-auto max-w-4xl">
-        <p className="text-sm uppercase tracking-[0.3em] text-[var(--gold)]">
-          AI fashion designer
-        </p>
-        <h1 className="mt-3 text-5xl md:text-7xl">Design with your fabric.</h1>
-        <p className="mt-6 max-w-2xl text-[var(--muted)]">
-          Upload a fabric image and generate visual dress concepts. The production
-          generation pipeline will be connected in the AI phase.
-        </p>
-      </div>
-    </main>
+    <>
+      <StorefrontNav />
+      <main>
+        <section className="bg-black px-5 py-24 text-white md:px-10 md:py-32">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--gold-bright)]">
+              AI fashion designer
+            </p>
+            <h1 className="mt-5 max-w-5xl text-7xl leading-[0.8] md:text-9xl">
+              Design from the fabric you already have.
+            </h1>
+            <p className="mt-7 max-w-2xl text-sm leading-7 text-white/60 md:text-base">
+              Upload a clear fabric photograph, choose a dress direction and explore multiple
+              visual concepts before you decide what to make.
+            </p>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 py-16 md:px-10 md:py-24">
+          <AIFashionDesigner />
+        </section>
+      </main>
+      <StorefrontFooter />
+    </>
   );
 }
