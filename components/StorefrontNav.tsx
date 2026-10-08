@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CartLink from "@/components/cart/CartLink";
 
 const links = [
   { href: "/", label: "Home" },
@@ -28,12 +29,7 @@ export default function StorefrontNav() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="/cart"
-            className="rounded-full border border-black/15 px-4 py-2 text-sm transition hover:border-black hover:bg-black hover:text-white"
-          >
-            Cart
-          </Link>
+          <CartLink />
           <Link
             href="/admin/login"
             className="hidden text-xs uppercase tracking-[0.2em] text-black/45 hover:text-black md:block"
