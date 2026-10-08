@@ -4,9 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AdminLoginForm() {
+type AdminLoginFormProps = {
+  adminId: string;
+  adminEmail: string;
+};
+
+export default function AdminLoginForm({ adminId, adminEmail }: AdminLoginFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [loginId, setLoginId] = useState(adminId);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -16,11 +21,20 @@ export default function AdminLoginForm() {
     setError("");
     setBusy(true);
 
+    const enteredId = loginId.trim();
+    const email = enteredId === adminId && adminEmail ? adminEmail : enteredId;
+
+    if (!email.includes("@")) {
+      setError("Admin access is not configured. Set SVASTIDA_ADMIN_EMAIL in the deployment environment.");
+      setBusy(false);
+      return;
+    }
+
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      setError("Invalid email or password.");
+      setError("Invalid admin credentials.");
       setBusy(false);
       return;
     }
@@ -38,20 +52,20 @@ export default function AdminLoginForm() {
       return;
     }
 
-    router.replace("/admin");
+    router.replace("/sree");
     router.refresh();
   }
 
   return (
     <form onSubmit={submit} className="space-y-5">
       <label className="block text-sm">
-        Email
+        Admin ID
         <input
-          type="email"
+          type="text"
           required
           autoComplete="username"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          value={loginId}
+          onChange={(event) => setLoginId(event.target.value)}
           className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3 outline-none focus:border-black"
         />
       </label>
