@@ -343,21 +343,11 @@ on public.customers for select
 to authenticated
 using (public.is_admin());
 
-create policy "public can create orders"
-on public.orders for insert
-to anon, authenticated
-with check (true);
-
 create policy "admins manage orders"
 on public.orders for all
 to authenticated
 using (public.is_admin())
 with check (public.is_admin());
-
-create policy "public can create order items"
-on public.order_items for insert
-to anon, authenticated
-with check (true);
 
 create policy "admins manage order items"
 on public.order_items for all
@@ -369,11 +359,6 @@ create policy "public can create ai generations"
 on public.ai_generations for insert
 to anon, authenticated
 with check (true);
-
-create policy "public can read own-session ai generations"
-on public.ai_generations for select
-to anon, authenticated
-using (true);
 
 create policy "admins manage ai generations"
 on public.ai_generations for all
@@ -403,3 +388,31 @@ to authenticated
 using (public.is_admin() or id = auth.uid())
 with check (public.is_admin() or id = auth.uid());
 
+
+-- Public product/catalog images are readable; uploads and deletion stay admin-only.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('product-images', 'product-images', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif']::text[]),
+  ('collection-images', 'collection-images', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif']::text[]),
+  ('ai-designs', 'ai-designs', true, 10485760, array['image/jpeg','image/png','image/webp','image/avif']::text[])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+create policy "public read catalog images"
+on storage.objects for select
+to anon, authenticated
+using (bucket_id in ('product-images', 'collection-images'));
+
+create policy "admins manage catalog images"
+on storage.objects for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "admins manage ai design assets"
+on storage.objects for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
