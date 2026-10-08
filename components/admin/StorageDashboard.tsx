@@ -33,6 +33,7 @@ export default function StorageDashboard() {
     setData(result);
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load(); }, []);
 
   if (error) return <div role="alert" className="rounded-2xl bg-red-50 p-6 text-sm text-red-700">{error}</div>;
