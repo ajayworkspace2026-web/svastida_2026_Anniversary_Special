@@ -6,7 +6,10 @@ test("health endpoint responds", async ({ request }) => {
   await expect(response.json()).resolves.toMatchObject({ ok: true });
 });
 
-test("admin login page is publicly reachable", async ({ page }) => {
-  await page.goto("/admin/login");
+test("private admin login page is publicly reachable only at the custom route", async ({ page }) => {
+  await page.goto("/sree");
   await expect(page.getByRole("heading", { name: /admin sign in/i })).toBeVisible();
+
+  const oldRoute = await page.request.get("/admin/login");
+  expect(oldRoute.status()).toBe(404);
 });
