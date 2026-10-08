@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { CartItem } from "@/lib/types";
 import AddToCart from "@/components/AddToCart";
+import ProductWhatsAppButton from "@/components/ProductWhatsAppButton";
 import { recommendSize } from "@/utils/sizeAI";
 
 type ProductPurchaseFormProps = {
@@ -110,6 +111,11 @@ export default function ProductPurchaseForm({ product }: ProductPurchaseFormProp
       </div>
 
       <AddToCart item={cartItem} disabled={product.sizes.length > 0 && !size} />
+      <ProductWhatsAppButton
+        phoneNumber={product.whatsappNumber}
+        productName={product.name}
+        size={size}
+      />
       {product.sizes.length > 0 && !size ? (
         <p className="text-xs text-black/40">Select a size to continue.</p>
       ) : null}
