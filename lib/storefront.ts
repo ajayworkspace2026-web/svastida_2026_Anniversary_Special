@@ -140,7 +140,7 @@ export async function getCollectionProducts(
     ? "&name=ilike.*" + encodeURIComponent(options.q.trim()) + "*"
     : "";
   const sizeFilter = options.size?.trim()
-    ? "&sizes=cs." + encodeURIComponent(`{${options.size.trim()}}`)
+    ? "&sizes=cs.%7B" + encodeURIComponent(options.size.trim()) + "%7D"
     : "";
   const minPrice =
     options.minPrice !== undefined && Number.isFinite(options.minPrice)
@@ -151,9 +151,27 @@ export async function getCollectionProducts(
       ? "&price=lte." + encodeURIComponent(String(Math.max(0, options.maxPrice)))
       : "";
 
+  // Resolve the collection ID first instead of relying on PostgREST
+  // relationship embedding. This is more resilient in production.
+  const collectionRows = await rest<Array<{ id: string }>>(
+    "collections?select=id&slug=eq." +
+      encodeURIComponent(slug) +
+      "&is_active=eq.true&limit=1",
+  );
+
+  const collectionId = collectionRows?.[0]?.id;
+  if (!collectionId) {
+    return {
+      items: [],
+      page,
+      pageSize,
+      hasNext: false,
+    };
+  }
+
   const query =
-    "products?select=id,slug,name,description,price,sale_price,featured,new_arrival,bestseller,custom_fit,sizes,status,product_images(storage_path,is_primary),collections!inner(slug)&status=eq.active&collections.slug=eq." +
-    encodeURIComponent(slug) +
+    "products?select=id,slug,name,description,price,sale_price,featured,new_arrival,bestseller,custom_fit,sizes,status,product_images(storage_path,is_primary)&status=eq.active&collection_id=eq." +
+    encodeURIComponent(collectionId) +
     search +
     sizeFilter +
     minPrice +
@@ -175,7 +193,6 @@ export async function getCollectionProducts(
     hasNext: items.length === pageSize,
   };
 }
-
 export async function getSiteSettings() {
   const rows = await rest<Array<{
     brand_name: string;
