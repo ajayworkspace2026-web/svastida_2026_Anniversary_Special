@@ -2,17 +2,34 @@ import type { CartItem } from "@/lib/types";
 
 export const CART_STORAGE_KEY = "svastida-cart";
 
+export function cartSnapshot() {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem(CART_STORAGE_KEY) ?? "";
+}
+
 export function readCart(): CartItem[] {
-  if (typeof window === "undefined") return [];
+  const value = cartSnapshot();
+  if (!value) return [];
 
   try {
-    const value = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!value) return [];
     const parsed = JSON.parse(value) as unknown;
     return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
   } catch {
     return [];
   }
+}
+
+export function subscribeCart(listener: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const sync = () => listener();
+  window.addEventListener("storage", sync);
+  window.addEventListener("svastida-cart-change", sync);
+
+  return () => {
+    window.removeEventListener("storage", sync);
+    window.removeEventListener("svastida-cart-change", sync);
+  };
 }
 
 export function writeCart(items: CartItem[]) {
