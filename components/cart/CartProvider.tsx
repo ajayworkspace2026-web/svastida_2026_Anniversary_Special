@@ -1,8 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import type { CartItem } from "@/lib/types";
-import { addCartItem, clearCart, readCart, removeCartItem, updateCartQuantity, cartTotal } from "@/lib/cart";
+import {
+  addCartItem,
+  cartSnapshot,
+  cartTotal,
+  clearCart,
+  removeCartItem,
+  subscribeCart,
+  updateCartQuantity,
+} from "@/lib/cart";
 
 type CartContextValue = {
   items: CartItem[];
@@ -17,31 +25,27 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const snapshot = useSyncExternalStore(subscribeCart, cartSnapshot, () => "");
 
-  useEffect(() => {
-    const sync = () => setItems(readCart());
-    sync();
-    window.addEventListener("storage", sync);
-    window.addEventListener("svastida-cart-change", sync);
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("svastida-cart-change", sync);
-    };
-  }, []);
+  const items = useMemo<CartItem[]>(() => {
+    if (!snapshot) return [];
+    try {
+      const parsed = JSON.parse(snapshot) as unknown;
+      return Array.isArray(parsed) ? (parsed as CartItem[]) : [];
+    } catch {
+      return [];
+    }
+  }, [snapshot]);
 
   const value = useMemo<CartContextValue>(
     () => ({
       items,
       total: cartTotal(items),
       count: items.reduce((sum, item) => sum + item.quantity, 0),
-      add: (item) => setItems(addCartItem(item)),
-      updateQuantity: (key, quantity) => setItems(updateCartQuantity(key, quantity)),
-      remove: (key) => setItems(removeCartItem(key)),
-      clear: () => {
-        clearCart();
-        setItems([]);
-      },
+      add: (item) => addCartItem(item),
+      updateQuantity: (key, quantity) => updateCartQuantity(key, quantity),
+      remove: (key) => removeCartItem(key),
+      clear: () => clearCart(),
     }),
     [items],
   );
