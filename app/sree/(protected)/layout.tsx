@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
 const links = [
-  ["/sree", "Overview"],
+  ["/sree/dashboard", "Overview"],
   ["/sree/products", "Products"],
   ["/sree/collections", "Collections"],
   ["/sree/orders", "Orders"],
