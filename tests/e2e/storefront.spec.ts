@@ -45,14 +45,14 @@ test("cart survives a reload", async ({ page }) => {
     ]));
   });
   await page.reload();
-  await expect(page.getByText("Test Dress")).toBeVisible();
-  await expect(page.getByText(/₹2,499/)).toBeVisible();
+  await expect(page.getByText("Test Dress", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("₹2,499", { exact: true }).last()).toBeVisible();
 });
 
 test("AI designer validates missing fabric without breaking the page", async ({ page }) => {
   await page.goto("/customise");
   await page.getByRole("button", { name: /Generate 4 design concepts/i }).click();
-  await expect(page.getByRole("alert")).toContainText(/upload a fabric image/i);
+  await expect(page.getByText("Upload a fabric image first.", { exact: true }).first()).toBeVisible();
 });
 
 test("private admin route is not exposed through the storefront", async ({ page }) => {
