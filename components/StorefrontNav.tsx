@@ -7,6 +7,7 @@ const links = [
   { href: "/collections", label: "Collections" },
   { href: "/customise", label: "Customise" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function StorefrontNav() {
