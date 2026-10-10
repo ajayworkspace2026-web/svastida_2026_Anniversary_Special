@@ -198,6 +198,10 @@ export async function getCollectionProducts(
     hasNext: items.length === pageSize,
   };
 }
+export async function getActiveProductSlugs() {
+  const rows = await rest<Array<{ slug: string }>>("products?select=slug&status=eq.active&order=created_at.desc");
+  return rows ?? [];
+}
 export async function getSiteSettings() {
   const rows = await rest<Array<{
     brand_name: string;
