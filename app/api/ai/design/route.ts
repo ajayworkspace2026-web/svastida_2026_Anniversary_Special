@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.AI_PROVIDER_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "AI image generation is not configured yet." }, { status: 503 });
+      return NextResponse.json({ configured: false, outputs: [], error: "AI image generation is not configured yet." });
     }
 
     const model = process.env.AI_IMAGE_MODEL || "gpt-image-2.5-flare";
@@ -85,7 +85,8 @@ export async function POST(request: Request) {
     aiForm.append("output_format", "webp");
     aiForm.append("output_compression", "80");
 
-    const response = await fetch("https://api.openai.com/v1/images/edits", {
+    const baseUrl = (process.env.AI_PROVIDER_BASE_URL || "https://api.openai.com").replace(/\\/$/, "");
+    const response = await fetch(baseUrl + "/v1/images/edits", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
       body: aiForm,
@@ -108,13 +109,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "The AI provider returned no designs." }, { status: 502 });
     }
 
-    const sourcePath = `sessions/${sessionId || "anonymous"}/fabric-${Date.now()}.webp`;
+    const extension =
+      fabric.type === "image/png" ? "png" :
+      fabric.type === "image/webp" ? "webp" : "jpg";
+    const sourcePath = `sessions/${sessionId}/fabric-${Date.now()}.${extension}`;
 
     const fabricBuffer = Buffer.from(await fabric.arrayBuffer());
-    await supabase.storage.from("ai-uploads").upload(sourcePath, fabricBuffer, {
+    const sourceUpload = await supabase.storage.from("ai-uploads").upload(sourcePath, fabricBuffer, {
       contentType: fabric.type,
       upsert: false,
     });
+    if (sourceUpload.error) {
+      return NextResponse.json({ error: "Could not securely save the fabric image." }, { status: 502 });
+    }
 
     const outputUrls: string[] = [];
 
@@ -133,10 +140,14 @@ export async function POST(request: Request) {
       if (data.publicUrl) outputUrls.push(data.publicUrl);
     }
 
-    const { data: generation } = await supabase
+    if (!outputUrls.length) {
+      return NextResponse.json({ error: "The generated designs could not be saved. Please try again." }, { status: 502 });
+    }
+
+    const { data: generation, error: generationError } = await supabase
       .from("ai_generations")
       .insert({
-        customer_session_id: sessionId || null,
+        customer_session_id: sessionId,
         source_storage_path: sourcePath,
         prompt_options: { dressType, sleeve, neckline, model },
         status: "completed",
@@ -147,7 +158,12 @@ export async function POST(request: Request) {
       .select("id")
       .single();
 
+    if (generationError) {
+      return NextResponse.json({ error: "Designs were generated but could not be recorded. Please try again." }, { status: 502 });
+    }
+
     return NextResponse.json({
+      configured: true,
       generationId: generation?.id ?? null,
       outputs: outputUrls,
     });
