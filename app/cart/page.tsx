@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
-import CheckoutForm from "@/components/CheckoutForm";
+import EnquiryForm from "@/components/EnquiryForm";
 import { cartItemKey } from "@/lib/cart";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/components/cart/CartProvider";
@@ -18,13 +18,13 @@ export default function CartPage() {
       <>
         <StorefrontNav />
         <main className="mx-auto max-w-3xl px-5 py-24 text-center md:px-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Order received</p>
-          <h1 className="mt-5 text-7xl leading-[0.85]">Your request is in.</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Enquiry received</p>
+          <h1 className="mt-5 text-7xl leading-[0.85]">Your enquiry is in.</h1>
           <p className="mt-6 text-sm leading-7 text-black/55">
-            Order ID: <strong className="text-black">{order.orderNumber}</strong>
+            Enquiry ID: <strong className="text-black">{order.orderNumber}</strong>
           </p>
           <p className="mt-2 text-sm leading-7 text-black/55">
-            Send the order to WhatsApp so the team can contact you and confirm availability.
+            We’ll share your enquiry with the Svastida team so they can contact you and confirm the details.
           </p>
 
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
@@ -108,10 +108,10 @@ export default function CartPage() {
             </section>
 
             <aside className="h-fit rounded-2xl bg-[#f7f5f0] p-7 lg:sticky lg:top-28">
-              <p className="text-xs uppercase tracking-[0.22em] text-black/40">Checkout</p>
-              <h2 className="mt-3 text-4xl">Request your order.</h2>
+              <p className="text-xs uppercase tracking-[0.22em] text-black/40">Enquiry</p>
+              <h2 className="mt-3 text-4xl">Send your enquiry.</h2>
               <p className="mt-3 text-sm leading-6 text-black/50">
-                No online payment is taken. We save your request, then send the complete order details to WhatsApp for confirmation.
+                No payment is taken online. We save your enquiry and, when WhatsApp is configured, send the complete enquiry details to the team for confirmation.
               </p>
               <div className="my-6 border-y border-black/10 py-5">
                 <div className="flex justify-between text-sm">
@@ -120,7 +120,7 @@ export default function CartPage() {
                 </div>
                 <p className="mt-2 text-xs text-black/40">Shipping and final confirmation are handled by the team.</p>
               </div>
-              <CheckoutForm items={items} total={total} onSuccess={(result) => { clear(); setOrder(result); }} />
+              <EnquiryForm items={items} total={total} onSuccess={(result) => { clear(); setOrder(result); }} />
             </aside>
           </div>
         )}
