@@ -130,7 +130,7 @@ export default function CheckoutForm({ items, total, onSuccess }: CheckoutFormPr
           disabled={submitting}
           className="rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {submitting ? "Creating order..." : "Place order"}
+          {submitting ? "Creating order..." : "Send enquiry"}
         </button>
       </div>
     </form>
