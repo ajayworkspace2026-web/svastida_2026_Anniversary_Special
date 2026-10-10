@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className={`${displayFont.variable} ${bodyFont.variable}`}>
         <CartProvider>
           {children}
-          <TailorAssistant aiConfigured={Boolean(process.env.AI_PROVIDER_API_KEY)} />
+          <TailorAssistant aiConfigured={Boolean(process.env.GEMINI_API_KEY)} />
           <CyberSafetyNotice />
         </CartProvider>
       </body>
