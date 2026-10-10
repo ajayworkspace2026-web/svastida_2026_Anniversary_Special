@@ -4,8 +4,8 @@ import { getSiteSettings } from "@/lib/storefront";
 
 const milestones = [
   ["01", "The beginning", "A simple idea: make the person wearing the garment part of the design process."],
-  ["02", "The craft", "Combine curated fashion with practical custom-fit options and thoughtful service."],
-  ["03", "The next step", "Use technology to help customers visualise possibilities before placing an order."],
+  ["02", "The first year", "One year of learning, creating, listening to customers, and shaping a more personal way to discover fashion."],
+  ["03", "The journey ahead", "Bring style discovery, custom fit, fabric-led design and thoughtful customer support together in one experience."],
 ];
 
 export default async function AboutPage() {
@@ -17,10 +17,14 @@ export default async function AboutPage() {
       <main>
         <section className="bg-black px-5 py-24 text-white md:px-10 md:py-32">
           <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--gold-bright)]">Our journey</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--gold-bright)]">Our first anniversary</p>
             <h1 className="mt-5 max-w-5xl text-7xl leading-[0.8] md:text-9xl">
-              {settings?.about_title || "Built around the woman, not the size chart."}
+              {settings?.about_title || "One year of dressing the story you want to tell."}
             </h1>
+            <p className="mt-7 max-w-2xl text-sm leading-7 text-white/60 md:text-base">
+              Svastida Fashion&apos;s story journey turns one. This first anniversary is a moment to celebrate
+              the people, ideas and conversations that helped shape the brand.
+            </p>
           </div>
         </section>
 
@@ -31,7 +35,7 @@ export default async function AboutPage() {
               <h2 className="mt-4 text-6xl leading-[0.9]">Personal style deserves personal attention.</h2>
             </div>
             <div className="text-base leading-8 text-black/60 md:text-lg">
-              <p>{settings?.about_content || "Your brand story will appear here once it is added from the admin settings."}</p>
+              <p>{settings?.about_content || "Our first year has been about creating a more personal bridge between the customer, the fabric and the final garment. Today, we are building a showcase experience where customers can explore styles, ask for guidance, and speak directly with the team before confirming an enquiry."}</p>
             </div>
           </div>
 
