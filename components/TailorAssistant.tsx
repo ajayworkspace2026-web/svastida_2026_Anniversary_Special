@@ -11,7 +11,7 @@ const starter: Message[] = [
   {
     role: "assistant",
     content:
-      "Hi, I’m Tailor 👋 I can help you choose a style, understand measurements, and pick the right fabric direction for your look.",
+      "Hi, I’m Tailor 👋 Ask me about Svastida, clothing styles, fabrics, fit, or how to take your measurements.",
   },
 ];
 
@@ -35,7 +35,7 @@ export default function TailorAssistant({ aiConfigured = true }: { aiConfigured?
         {
           role: "assistant",
           content:
-            "I’m ready to help, but my AI service is still being connected. For now, you can ask the Svastida team on WhatsApp or email about measurements and fabric selection.",
+            "Tailor is almost ready. Add the Gemini API key in Vercel Environment Variables, then redeploy to enable the assistant.",
         },
       ]);
       return;
@@ -46,9 +46,7 @@ export default function TailorAssistant({ aiConfigured = true }: { aiConfigured?
       const response = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: next.slice(-12),
-        }),
+        body: JSON.stringify({ messages: next.slice(-12) }),
       });
 
       const result = (await response.json()) as { answer?: string; error?: string };
@@ -93,12 +91,17 @@ export default function TailorAssistant({ aiConfigured = true }: { aiConfigured?
                 <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold-bright)]">Svastida assistant</p>
                 <h2 className="mt-1 text-2xl">Tailor</h2>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="grid size-9 place-items-center rounded-full border border-white/20 text-lg" aria-label="Close Tailor">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="grid size-9 place-items-center rounded-full border border-white/20 text-lg"
+                aria-label="Close Tailor"
+              >
                 ×
               </button>
             </div>
             <p className="mt-2 text-xs leading-5 text-white/60">
-              Ask about measurements, fabric selection, silhouettes, or what might suit your occasion.
+              Ask about measurements, fabric selection, silhouettes, occasions, or using the website.
             </p>
           </div>
 
@@ -106,12 +109,20 @@ export default function TailorAssistant({ aiConfigured = true }: { aiConfigured?
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={message.role === "user" ? "ml-8 rounded-2xl bg-black px-4 py-3 text-sm text-white" : "mr-8 rounded-2xl bg-[#f7f5f0] px-4 py-3 text-sm leading-6"}
+                className={
+                  message.role === "user"
+                    ? "ml-8 rounded-2xl bg-black px-4 py-3 text-sm text-white"
+                    : "mr-8 rounded-2xl bg-[#f7f5f0] px-4 py-3 text-sm leading-6"
+                }
               >
                 {message.content}
               </div>
             ))}
-            {busy ? <div className="mr-8 rounded-2xl bg-[#f7f5f0] px-4 py-3 text-sm text-black/45">Tailor is thinking…</div> : null}
+            {busy ? (
+              <div className="mr-8 rounded-2xl bg-[#f7f5f0] px-4 py-3 text-sm text-black/45">
+                Tailor is thinking…
+              </div>
+            ) : null}
           </div>
 
           <form
