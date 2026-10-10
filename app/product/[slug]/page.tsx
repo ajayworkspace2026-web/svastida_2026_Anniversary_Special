@@ -44,7 +44,7 @@ export default async function ProductPage({
 
           <section className="lg:sticky lg:top-28 lg:h-fit">
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">
-              {product.custom_fit ? "Custom fit available" : "Ready to order"}
+              {product.custom_fit ? "Custom fit available" : "Available for enquiry"}
             </p>
             <h1 className="mt-4 text-6xl leading-[0.86]">{product.name}</h1>
 
