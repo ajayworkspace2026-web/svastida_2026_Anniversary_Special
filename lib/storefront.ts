@@ -23,7 +23,7 @@ export function storagePublicUrl(path: string | null, bucket = "product-images")
   return `${url}/storage/v1/object/public/${bucket}/${path}`;
 }
 
-async function rest<T>(path: string): Promise<T | null> {
+async function rest<T>(path: string, revalidate = 60): Promise<T | null> {
   const { url, anonKey } = getConfig();
   if (!url || !anonKey) return null;
 
@@ -33,7 +33,7 @@ async function rest<T>(path: string): Promise<T | null> {
         apikey: anonKey,
         Authorization: `Bearer ${anonKey}`,
       },
-      next: { revalidate: 60 },
+      next: { revalidate },
       signal: AbortSignal.timeout(8000),
     });
 
@@ -156,8 +156,6 @@ export async function getCollectionProducts(
       ? "&price=lte." + encodeURIComponent(String(Math.max(0, options.maxPrice)))
       : "";
 
-  // Resolve the collection ID first instead of relying on PostgREST
-  // relationship embedding. This is more resilient in production.
   const collectionRows = await rest<Array<{ id: string }>>(
     "collections?select=id&slug=eq." +
       encodeURIComponent(slug) +
@@ -198,10 +196,12 @@ export async function getCollectionProducts(
     hasNext: items.length === pageSize,
   };
 }
+
 export async function getActiveProductSlugs() {
   const rows = await rest<Array<{ slug: string }>>("products?select=slug&status=eq.active&order=created_at.desc");
   return rows ?? [];
 }
+
 export async function getSiteSettings() {
   const rows = await rest<Array<{
     brand_name: string;
@@ -216,4 +216,19 @@ export async function getSiteSettings() {
   }>>("site_settings?select=brand_name,whatsapp_admin_number,business_email,business_phone,instagram_url,facebook_url,address,about_title,about_content&id=eq.true&limit=1");
 
   return rows?.[0] ?? null;
+}
+
+export async function getAboutImages() {
+  const rows = await rest<Array<{
+    id: string;
+    storage_path: string;
+    title: string | null;
+    alt_text: string | null;
+    sort_order: number;
+  }>>(
+    "about_images?select=id,storage_path,title,alt_text,sort_order&is_active=eq.true&order=sort_order.asc,created_at.desc",
+    0,
+  );
+
+  return rows ?? [];
 }
