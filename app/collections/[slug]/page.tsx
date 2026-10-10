@@ -106,7 +106,18 @@ export default async function CollectionPage({
             <div className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
               {result.items.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
-            <Pagination basePath={`/collections/${slug}`} page={result.page} hasNext={result.hasNext} />
+            <Pagination
+              basePath={`/collections/${slug}`}
+              page={result.page}
+              hasNext={result.hasNext}
+              query={{
+                q: query.q,
+                sort: query.sort,
+                size: query.size,
+                min: query.min,
+                max: query.max,
+              }}
+            />
           </>
         )}
       </main>
