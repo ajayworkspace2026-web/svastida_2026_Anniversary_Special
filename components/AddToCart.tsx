@@ -24,7 +24,7 @@ export default function AddToCart({ item, disabled }: AddToCartProps) {
       }}
       className="w-full rounded-full bg-black px-6 py-4 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-40"
     >
-      {added ? "Added to cart" : "Add to cart"}
+      {added ? "Added to enquiry" : "Add to enquiry"}
     </button>
   );
 }
