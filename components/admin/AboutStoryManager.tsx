@@ -36,6 +36,8 @@ export default function AboutStoryManager() {
   }, [supabase]);
 
   useEffect(() => {
+    // The gallery is external Supabase data; load it once when the admin view mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
 
