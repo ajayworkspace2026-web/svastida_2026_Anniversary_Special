@@ -9,7 +9,7 @@ const styles = ["Anarkali", "Maxi Dress", "Gown", "Kurti", "Lehenga", "Party Dre
 const sleeves = ["Sleeveless", "Short sleeve", "Long sleeve", "Statement sleeve"];
 const necklines = ["Round", "V-neck", "Square", "Sweetheart", "High neck"];
 
-export default function AIFashionDesigner() {
+export default function AIFashionDesigner({ aiConfigured = true }: { aiConfigured?: boolean }) {
   const { add } = useCart();
   const [fabric, setFabric] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -47,6 +47,12 @@ export default function AIFashionDesigner() {
 
     setError("");
     setNotice("");
+
+    if (!aiConfigured) {
+      setError("AI design generation is not configured yet. Please try again after the store administrator adds the AI provider key.");
+      return;
+    }
+
     setBusy(true);
     setSelected(null);
 
