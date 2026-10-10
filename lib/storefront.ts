@@ -27,16 +27,21 @@ async function rest<T>(path: string): Promise<T | null> {
   const { url, anonKey } = getConfig();
   if (!url || !anonKey) return null;
 
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
-    },
-    next: { revalidate: 60 },
-  });
+  try {
+    const response = await fetch(`${url}/rest/v1/${path}`, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+      },
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(8000),
+    });
 
-  if (!response.ok) return null;
-  return (await response.json()) as T;
+    if (!response.ok) return null;
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
 }
 
 function mapProduct(row: ProductRow): ProductListItem {
