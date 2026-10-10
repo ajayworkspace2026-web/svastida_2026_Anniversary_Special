@@ -7,11 +7,9 @@ export default function CyberSafetyNotice() {
 
   useEffect(() => {
     if (window.localStorage.getItem("svastida-cyber-notice-seen") !== "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
     }
-    // LocalStorage is an external browser-side system; this one-time hydration read is intentional.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    // The state update is kept inside the effect to avoid reading browser storage during render.
   }, []);
 
   function dismiss() {
