@@ -32,40 +32,57 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ask Tailor a question first." }, { status: 400 });
     }
 
-    const model = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash";
-    const endpoint =
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
-      encodeURIComponent(model) +
-      ":generateContent";
+    const configuredModel = (process.env.GEMINI_CHAT_MODEL || "").trim();
+    const fallbackModel = "gemini-2.5-flash";
+    const modelsToTry = configuredModel && configuredModel !== fallbackModel
+      ? [configuredModel, fallbackModel]
+      : [fallbackModel];
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+    const requestBody = {
+      systemInstruction: {
+        parts: [{
+          text:
+            "You are Tailor, Svastida Fashion's virtual fashion assistant. " +
+            "Your job is to help website visitors with Svastida website navigation, products and collections when information is provided in the conversation, clothing styles, outfit selection, fabrics, colours, occasions, fit, and garment measurements. " +
+            "For measurements, explain practical ways to measure bust, waist, hips, shoulder, sleeve length, garment length, and similar dimensions using a soft measuring tape. Explain that measurements should be taken over light clothing, tape should be snug rather than tight, and the person should stand naturally. Never promise an exact fit from measurements alone. " +
+            "Do not invent Svastida products, prices, stock, shipping timelines, policies, phone numbers, WhatsApp numbers, addresses, discounts, or order status. When the answer depends on current store data that you do not have, tell the customer to contact Svastida. " +
+            "Keep replies friendly, practical, and concise. You may politely decline questions that are unrelated to Svastida, fashion, clothing, fit, measurements, or website help. " +
+            "Never ask for or handle passwords, OTPs, UPI PINs, card numbers, CVVs, banking credentials, or remote device access.",
+        }],
       },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{
-            text:
-              "You are Tailor, Svastida Fashion's virtual fashion assistant. " +
-              "Your job is to help website visitors with Svastida website navigation, products and collections when information is provided in the conversation, clothing styles, outfit selection, fabrics, colours, occasions, fit, and garment measurements. " +
-              "For measurements, explain practical ways to measure bust, waist, hips, shoulder, sleeve length, garment length, and similar dimensions using a soft measuring tape. Explain that measurements should be taken over light clothing, tape should be snug rather than tight, and the person should stand naturally. Never promise an exact fit from measurements alone. " +
-              "Do not invent Svastida products, prices, stock, shipping timelines, policies, phone numbers, WhatsApp numbers, addresses, discounts, or order status. When the answer depends on current store data that you do not have, tell the customer to contact Svastida. " +
-              "Keep replies friendly, practical, and concise. You may politely decline questions that are unrelated to Svastida, fashion, clothing, fit, measurements, or website help. " +
-              "Never ask for or handle passwords, OTPs, UPI PINs, card numbers, CVVs, banking credentials, or remote device access.",
-          }],
+      contents: messages.map((message) => ({
+        role: message.role === "assistant" ? "model" : "user",
+        parts: [{ text: message.content }],
+      })),
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 450,
+      },
+    };
+
+    let response: Response | null = null;
+
+    for (const model of modelsToTry) {
+      const endpoint =
+        "https://generativelanguage.googleapis.com/v1beta/models/" +
+        encodeURIComponent(model) +
+        ":generateContent";
+
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
         },
-        contents: messages.map((message) => ({
-          role: message.role === "assistant" ? "model" : "user",
-          parts: [{ text: message.content }],
-        })),
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 450,
-        },
-      }),
-    });
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.status !== 404 || model === fallbackModel) break;
+    }
+
+    if (!response) {
+      return NextResponse.json({ error: "Tailor could not connect to Gemini." }, { status: 502 });
+    }
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
