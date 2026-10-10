@@ -279,6 +279,7 @@ export async function POST(request: Request) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            token: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET ?? "",
             enquiryId: order.order_number,
             createdAt: new Date().toISOString(),
             customer: {
