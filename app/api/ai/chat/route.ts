@@ -13,10 +13,10 @@ function clean(value: unknown, max = 1000) {
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.AI_PROVIDER_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Tailor AI is being connected. Please use the contact options for help right now." },
+        { error: "Tailor AI is not configured yet. Please use the contact options for help right now." },
         { status: 503 },
       );
     }
@@ -32,29 +32,56 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ask Tailor a question first." }, { status: 400 });
     }
 
-    const model = process.env.AI_CHAT_MODEL || "gpt-6-luna";
-    const baseUrl = (process.env.AI_PROVIDER_BASE_URL || "https://api.openai.com").replace(/\/$/, "");
-    const response = await fetch(baseUrl + "/v1/responses", {
+    const model = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash";
+    const endpoint =
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(model) +
+      ":generateContent";
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        Authorization: "Bearer " + apiKey,
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        model,
-        instructions:
-          "You are Tailor, Svastida Fashion's warm and practical virtual fashion assistant. Help users choose silhouettes, fabrics, colours, occasions, and understand how to take garment measurements. Be concise, friendly, and transparent: recommendations are guidance, not a guarantee of fit. Never ask for or handle OTPs, passwords, UPI PINs, CVVs, card numbers, banking credentials, or remote device access. Do not invent store policies, prices, shipping promises, or contact details. When a question requires a final order decision, tell the user to contact Svastida. Svastida currently works enquiries through phone/WhatsApp and stays in touch with customers.",
-        input: messages,
-        max_output_tokens: 450,
+        systemInstruction: {
+          parts: [{
+            text:
+              "You are Tailor, Svastida Fashion's virtual fashion assistant. " +
+              "Your job is to help website visitors with Svastida website navigation, products and collections when information is provided in the conversation, clothing styles, outfit selection, fabrics, colours, occasions, fit, and garment measurements. " +
+              "For measurements, explain practical ways to measure bust, waist, hips, shoulder, sleeve length, garment length, and similar dimensions using a soft measuring tape. Explain that measurements should be taken over light clothing, tape should be snug rather than tight, and the person should stand naturally. Never promise an exact fit from measurements alone. " +
+              "Do not invent Svastida products, prices, stock, shipping timelines, policies, phone numbers, WhatsApp numbers, addresses, discounts, or order status. When the answer depends on current store data that you do not have, tell the customer to contact Svastida. " +
+              "Keep replies friendly, practical, and concise. You may politely decline questions that are unrelated to Svastida, fashion, clothing, fit, measurements, or website help. " +
+              "Never ask for or handle passwords, OTPs, UPI PINs, card numbers, CVVs, banking credentials, or remote device access.",
+          }],
+        },
+        contents: messages.map((message) => ({
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        })),
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 450,
+        },
       }),
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "Tailor is temporarily unavailable. Please try again." }, { status: 502 });
+      return NextResponse.json(
+        { error: "Tailor is temporarily unavailable. Please try again." },
+        { status: 502 },
+      );
     }
 
-    const result = (await response.json()) as { output_text?: string };
-    const answer = clean(result.output_text, 2000);
+    const result = (await response.json()) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    };
+    const answer = clean(
+      result.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("\n") ?? "",
+      2000,
+    );
+
     if (!answer) {
       return NextResponse.json({ error: "Tailor could not reply right now." }, { status: 502 });
     }
