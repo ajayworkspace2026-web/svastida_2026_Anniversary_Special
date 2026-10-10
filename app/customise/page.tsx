@@ -23,7 +23,7 @@ export default function CustomisePage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-5 py-16 md:px-10 md:py-24">
-          <AIFashionDesigner />
+          <AIFashionDesigner aiConfigured={Boolean(process.env.AI_PROVIDER_API_KEY)} />
         </section>
       </main>
       <StorefrontFooter />
