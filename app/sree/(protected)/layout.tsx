@@ -7,7 +7,7 @@ const links = [
   ["/sree/dashboard", "Overview"],
   ["/sree/products", "Products"],
   ["/sree/collections", "Collections"],
-  ["/sree/orders", "Orders"],
+  ["/sree/orders", "Enquiries"],
   ["/sree/settings", "Settings"],
 ];
 
