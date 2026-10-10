@@ -38,6 +38,12 @@ export default function CartPage() {
                 Send order on WhatsApp
               </a>
             ) : null}
+            <a
+              href="mailto:svastidaa.helpdesk@gmail.com"
+              className="rounded-full border border-black/15 px-7 py-3.5 text-sm font-semibold transition hover:border-black"
+            >
+              Email Svastida
+            </a>
             <Link
               href="/collections"
               className="rounded-full border border-black/15 px-7 py-3.5 text-sm font-semibold transition hover:border-black"
