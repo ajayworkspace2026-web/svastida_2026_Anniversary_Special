@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import StorageDashboard from "@/components/admin/StorageDashboard";
+import AboutStoryManager from "@/components/admin/AboutStoryManager";
 
 export default function AdminSettingsPage() {
   const [form, setForm] = useState({
@@ -63,7 +64,10 @@ export default function AdminSettingsPage() {
         address: form.address.trim() || null,
         about_title: form.aboutTitle.trim() || null,
         about_content: form.aboutContent.trim() || null,
-        storage_limit_bytes: Number.isFinite(storageGB) && storageGB > 0 ? Math.round(storageGB * 1024 ** 3) : 16 * 1024 ** 3,
+        storage_limit_bytes:
+          Number.isFinite(storageGB) && storageGB > 0
+            ? Math.round(storageGB * 1024 ** 3)
+            : 16 * 1024 ** 3,
       })
       .eq("id", true);
 
@@ -90,39 +94,66 @@ export default function AdminSettingsPage() {
           ].map(([key, label]) => (
             <label key={key} className="text-sm">
               {label}
-              <input value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" />
+              <input
+                value={form[key as keyof typeof form]}
+                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3"
+              />
             </label>
           ))}
         </div>
 
-        <label className="block text-sm">Business address
-          <textarea rows={3} value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" />
+        <label className="block text-sm">
+          Business address
+          <textarea
+            rows={3}
+            value={form.address}
+            onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+            className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3"
+          />
         </label>
 
         <div className="border-t border-black/10 pt-7">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">About page</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">About page copy</p>
           <div className="mt-5 space-y-4">
-            <label className="block text-sm">Title<input value={form.aboutTitle} onChange={(e) => setForm((f) => ({ ...f, aboutTitle: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" /></label>
-            <label className="block text-sm">Story<textarea rows={8} value={form.aboutContent} onChange={(e) => setForm((f) => ({ ...f, aboutContent: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" /></label>
+            <label className="block text-sm">
+              Title
+              <input
+                value={form.aboutTitle}
+                onChange={(e) => setForm((f) => ({ ...f, aboutTitle: e.target.value }))}
+                className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3"
+              />
+            </label>
+            <label className="block text-sm">
+              Story
+              <textarea
+                rows={8}
+                value={form.aboutContent}
+                onChange={(e) => setForm((f) => ({ ...f, aboutContent: e.target.value }))}
+                className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3"
+              />
+            </label>
           </div>
-        </div>
-
-        <div className="border-t border-black/10 pt-7">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">Storage meter</p>
-          <label className="mt-5 block max-w-xs text-sm">Configured limit (GB)
-            <input type="number" min="1" step="0.01" value={form.storageLimitGB} onChange={(e) => setForm((f) => ({ ...f, storageLimitGB: e.target.value }))} className="mt-2 w-full rounded-xl border border-black/15 px-4 py-3" />
-          </label>
-          <p className="mt-2 text-xs leading-5 text-black/40">This controls the dashboard meter. It does not increase the provider&apos;s actual storage quota.</p>
         </div>
 
         {message ? <p className="rounded-xl bg-[#f7f5f0] px-4 py-3 text-sm">{message}</p> : null}
 
-        <button disabled={saving} type="submit" className="rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white disabled:opacity-50">
+        <button
+          disabled={saving}
+          type="submit"
+          className="rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white disabled:opacity-50"
+        >
           {saving ? "Saving..." : "Save settings"}
         </button>
       </form>
 
-      <div className="mt-6"><StorageDashboard /></div>
+      <div className="mt-6">
+        <AboutStoryManager />
+      </div>
+
+      <div className="mt-6">
+        <StorageDashboard />
+      </div>
     </div>
   );
 }
