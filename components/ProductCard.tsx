@@ -28,7 +28,7 @@ export default function ProductCard({ product }: { product: ProductListItem }) {
               {product.name}
             </Link>
             <p className="mt-1 text-xs uppercase tracking-[0.18em] text-black/45">
-              {product.custom_fit ? "Custom fit available" : "Ready to order"}
+              {product.custom_fit ? "Custom fit available" : "Available for enquiry"}
             </p>
           </div>
           <div className="text-right text-sm font-medium">
