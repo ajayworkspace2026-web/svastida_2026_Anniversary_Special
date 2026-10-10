@@ -1,18 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
     <main className="grid min-h-screen place-items-center bg-[#f7f5f0] px-5 py-16 text-center">
       <div className="max-w-lg">
