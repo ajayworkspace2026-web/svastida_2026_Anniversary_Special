@@ -68,6 +68,27 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        return NextResponse.json(
+          { error: "Tailor could not authenticate with Gemini. Check the GEMINI_API_KEY in Vercel and redeploy." },
+          { status: 502 },
+        );
+      }
+
+      if (response.status === 404) {
+        return NextResponse.json(
+          { error: "The configured Gemini model is unavailable. Check GEMINI_CHAT_MODEL in Vercel." },
+          { status: 502 },
+        );
+      }
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { error: "Tailor has reached the Gemini free-tier limit for now. Please try again later." },
+          { status: 429 },
+        );
+      }
+
       return NextResponse.json(
         { error: "Tailor is temporarily unavailable. Please try again." },
         { status: 502 },
