@@ -120,7 +120,7 @@ export default function CartPage() {
                 </div>
                 <p className="mt-2 text-xs text-black/40">Shipping and final confirmation are handled by the team.</p>
               </div>
-              <CheckoutForm items={items} total={total} onSuccess={setOrder} />
+              <CheckoutForm items={items} total={total} onSuccess={(result) => { clear(); setOrder(result); }} />
             </aside>
           </div>
         )}
