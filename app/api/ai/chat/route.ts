@@ -32,11 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ask Tailor a question first." }, { status: 400 });
     }
 
-    const configuredModel = (process.env.GEMINI_CHAT_MODEL || "").trim();
-    const fallbackModel = "gemini-2.5-flash";
-    const modelsToTry = configuredModel && configuredModel !== fallbackModel
-      ? [configuredModel, fallbackModel]
-      : [fallbackModel];
+    const model = "gemini-2.5-flash";
 
     const requestBody = {
       systemInstruction: {
@@ -60,29 +56,19 @@ export async function POST(request: Request) {
       },
     };
 
-    let response: Response | null = null;
+    const endpoint =
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(model) +
+      ":generateContent";
 
-    for (const model of modelsToTry) {
-      const endpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/" +
-        encodeURIComponent(model) +
-        ":generateContent";
-
-      response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (response.status !== 404 || model === fallbackModel) break;
-    }
-
-    if (!response) {
-      return NextResponse.json({ error: "Tailor could not connect to Gemini." }, { status: 502 });
-    }
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
