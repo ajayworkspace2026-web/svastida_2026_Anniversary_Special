@@ -7,7 +7,13 @@ const bodyFont = DM_Sans({ subsets: ["latin"], variable: "--font-body-local" });
 import { CartProvider } from "@/components/cart/CartProvider";
 
 export const metadata: Metadata = {
-  title: "Svastida | Custom Women's Fashion",
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined,
+  title: {
+    default: "Svastida",
+    template: "%s | Svastida",
+  },
   description:
     "A premium custom women's fashion storefront with personalized styling and direct WhatsApp ordering.",
 };
