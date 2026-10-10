@@ -60,3 +60,19 @@ test("private admin route is not exposed through the storefront", async ({ page 
   await expect(page.getByRole("heading", { name: /admin sign in/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Admin Panel/i })).toHaveCount(0);
 });
+
+
+test("cyber safety notice is shown on first visit", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /stay safe while shopping online/i })).toBeVisible();
+  await page.getByRole("button", { name: "I understand" }).click();
+  await expect(page.getByRole("heading", { name: /stay safe while shopping online/i })).toHaveCount(0);
+});
+
+test("Tailor assistant popup opens", async ({ page }) => {
+  await page.goto("/");
+  const safetyNotice = page.getByRole("button", { name: "I understand" });
+  if (await safetyNotice.count()) await safetyNotice.click();
+  await page.getByRole("button", { name: /open tailor assistant/i }).click();
+  await expect(page.getByRole("heading", { name: "Tailor" })).toBeVisible();
+});
