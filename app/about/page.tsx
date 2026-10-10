@@ -1,6 +1,6 @@
 import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
-import { getSiteSettings } from "@/lib/storefront";
+import { getAboutImages, getSiteSettings, storagePublicUrl } from "@/lib/storefront";
 
 const milestones = [
   ["01", "The beginning", "A simple idea: make the person wearing the garment part of the design process."],
@@ -9,7 +9,7 @@ const milestones = [
 ];
 
 export default async function AboutPage() {
-  const settings = await getSiteSettings();
+  const [settings, images] = await Promise.all([getSiteSettings(), getAboutImages()]);
 
   return (
     <>
@@ -38,6 +38,34 @@ export default async function AboutPage() {
               <p>{settings?.about_content || "Our first year has been about creating a more personal bridge between the customer, the fabric and the final garment. Today, we are building a showcase experience where customers can explore styles, ask for guidance, and speak directly with the team before confirming an enquiry."}</p>
             </div>
           </div>
+
+          {images.length ? (
+            <section className="mt-24">
+              <div className="flex items-end justify-between gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">From the story</p>
+                  <h2 className="mt-3 text-5xl leading-none md:text-7xl">Moments.</h2>
+                </div>
+                <p className="hidden max-w-sm text-sm leading-6 text-black/45 md:block">
+                  The Svastida team can update this gallery from the admin panel. Published images appear here automatically.
+                </p>
+              </div>
+
+              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {images.map((image, index) => (
+                  <figure key={image.id} className={index % 5 === 1 ? "sm:translate-y-10" : ""}>
+                    <div
+                      className="aspect-[4/5] rounded-2xl bg-cover bg-center"
+                      style={{ backgroundImage: `url("${storagePublicUrl(image.storage_path, "about-images") ?? ""}")` }}
+                      role="img"
+                      aria-label={image.alt_text ?? image.title ?? "Svastida story image"}
+                    />
+                    {image.title ? <figcaption className="mt-3 text-sm text-black/55">{image.title}</figcaption> : null}
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <div className="mt-20 grid gap-5 md:grid-cols-3">
             {milestones.map(([number, title, body]) => (
