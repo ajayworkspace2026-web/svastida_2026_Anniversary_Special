@@ -13,9 +13,14 @@ export default async function AdminOrdersPage() {
   return (
     <div>
       <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Operations</p>
-      <h1 className="mt-3 text-6xl leading-[0.85]">Orders.</h1>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <h1 className="mt-3 text-6xl leading-[0.85]">Enquiries.</h1>
+        <a href="/api/admin/enquiries/export" className="inline-flex w-fit rounded-full border border-black/15 px-5 py-2.5 text-xs font-semibold">
+          Export Excel CSV
+        </a>
+      </div>
       <div className="mt-10 space-y-4">
-        {!orders?.length ? <div className="rounded-2xl bg-white p-8 text-sm text-black/40">No orders yet.</div> : null}
+        {!orders?.length ? <div className="rounded-2xl bg-white p-8 text-sm text-black/40">No enquiries yet.</div> : null}
         {orders?.map((order) => (
           <article key={order.id} className="rounded-2xl bg-white p-6">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
