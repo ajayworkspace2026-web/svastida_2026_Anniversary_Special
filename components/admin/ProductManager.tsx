@@ -92,6 +92,9 @@ export default function ProductManager() {
   }
 
   async function uploadImage(file: File, productId: string) {
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("Product image must be 5 MB or smaller.");
+    }
     const extension = file.name.split(".").pop()?.toLowerCase() ?? "webp";
     const path = `products/${productId}/${crypto.randomUUID()}.${extension}`;
 
