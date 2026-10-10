@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     aiForm.append("output_format", "webp");
     aiForm.append("output_compression", "80");
 
-    const baseUrl = (process.env.AI_PROVIDER_BASE_URL || "https://api.openai.com").replace(/\\/$/, "");
+    const baseUrl = (process.env.AI_PROVIDER_BASE_URL || "https://api.openai.com").replace(/\/$/, "");
     const response = await fetch(baseUrl + "/v1/images/edits", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
