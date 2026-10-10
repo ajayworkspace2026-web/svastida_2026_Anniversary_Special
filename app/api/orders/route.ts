@@ -272,6 +272,40 @@ export async function POST(request: Request) {
       }
     }
 
+    const sheetWebhook = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+    if (sheetWebhook) {
+      try {
+        const sheetResponse = await fetch(sheetWebhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enquiryId: order.order_number,
+            createdAt: new Date().toISOString(),
+            customer: {
+              name: clean(customer.name, 120),
+              phone: clean(customer.phone, 30),
+              whatsappPhone: clean(customer.whatsappPhone, 30),
+              email: clean(customer.email, 180),
+              addressLine1: clean(customer.addressLine1, 250),
+              addressLine2: clean(customer.addressLine2, 250),
+              city: clean(customer.city, 100),
+              state: clean(customer.state, 100),
+              pincode: clean(customer.pincode, 20),
+              notes: clean(customer.customerNotes, 1000),
+            },
+            items: orderItems,
+            total: subtotal,
+          }),
+        });
+
+        if (!sheetResponse.ok) {
+          console.error("Google Sheets webhook rejected enquiry", order.order_number);
+        }
+      } catch (sheetError) {
+        console.error("Google Sheets webhook failed", sheetError);
+      }
+    }
+
     return NextResponse.json({
       orderNumber: order.order_number,
       whatsappUrl,
