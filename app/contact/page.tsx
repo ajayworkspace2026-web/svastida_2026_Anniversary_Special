@@ -14,7 +14,7 @@ export default async function ContactPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">Contact</p>
         <h1 className="mt-4 max-w-4xl text-7xl leading-[0.85]">A real person is one message away.</h1>
         <p className="mt-6 max-w-2xl text-sm leading-7 text-black/55">
-          Ask about sizing, fabric suitability, custom fit, or an existing order.
+          Ask about sizing, fabric suitability, custom fit, or an existing enquiry. We currently handle enquiries through phone calls and stay in touch with customers throughout the process.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -35,7 +35,7 @@ export default async function ContactPage() {
 
           <div className="border border-black/10 bg-white p-7">
             <p className="text-xs uppercase tracking-[0.25em] text-black/40">Email</p>
-            <p className="mt-2 display-font text-3xl">{settings?.business_email || "Configured from admin settings"}</p>
+            <p className="mt-2 display-font text-3xl">{settings?.business_email || "svastidaa.helpdesk@gmail.com"}</p>
             {settings?.business_email ? (
               <a href={`mailto:${settings.business_email}`} className="mt-6 inline-block rounded-full border border-black/15 px-6 py-3 text-sm font-semibold">
                 Send email
