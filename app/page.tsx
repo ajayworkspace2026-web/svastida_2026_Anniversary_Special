@@ -1,7 +1,5 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const AtelierHero = dynamic(() => import("@/components/AtelierHero"), { ssr: false });
+import AtelierHeroLoader from "@/components/AtelierHeroLoader";
 import StorefrontNav from "@/components/StorefrontNav";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
@@ -21,7 +19,7 @@ export default async function HomePage() {
   return (
     <>
       <StorefrontNav immersive />
-      <AtelierHero />
+      <AtelierHeroLoader />
 
       <main>
         <section id="collections" className="px-5 py-24 md:px-10">
