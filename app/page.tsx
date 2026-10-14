@@ -6,6 +6,7 @@ import StorefrontNav from "@/components/StorefrontNav";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import CollectionCard from "@/components/CollectionCard";
+import AtelierShowroom from "@/components/AtelierShowroom";
 import AboutPreview from "@/components/AboutPreview";
 import WhatsAppCta from "@/components/WhatsAppCta";
 import StorefrontFooter from "@/components/StorefrontFooter";
@@ -51,6 +52,8 @@ export default async function HomePage() {
             )}
           </div>
         </section>
+
+        <AtelierShowroom collections={collections.map((collection) => ({ name: collection.name, slug: collection.slug }))} />
 
         <section className="px-5 py-24 md:px-10">
           <div className="mx-auto max-w-7xl">
