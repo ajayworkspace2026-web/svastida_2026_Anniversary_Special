@@ -85,9 +85,10 @@ function Particles() {
   const points = useMemo(() => {
     const positions = new Float32Array(90 * 3);
     for (let i = 0; i < 90; i += 1) {
-      positions[i * 3] = (Math.random() - 0.5) * 6.5;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 5.8;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 3.8;
+      const seed = i + 1;
+      positions[i * 3] = Math.sin(seed * 12.9898) * 3.25;
+      positions[i * 3 + 1] = Math.cos(seed * 78.233) * 2.9;
+      positions[i * 3 + 2] = Math.sin(seed * 4.733) * 1.9;
     }
     return positions;
   }, []);
