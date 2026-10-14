@@ -1,5 +1,7 @@
 import Link from "next/link";
-import AtelierHero from "@/components/AtelierHero";
+import dynamic from "next/dynamic";
+
+const AtelierHero = dynamic(() => import("@/components/AtelierHero"), { ssr: false });
 import StorefrontNav from "@/components/StorefrontNav";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
