@@ -131,7 +131,8 @@ export default function AtelierShowroom({ collections }: { collections: Collecti
           <div className="pointer-events-none absolute inset-x-5 bottom-5 flex items-end justify-between gap-3">
             {items.map((item, index) => {
               const itemKey = item.slug + "-" + index;
-              const itemHref = "/collections/" + item.slug;
+              const isFallback = index >= collections.length;
+              const itemHref = isFallback ? "/collections" : "/collections/" + item.slug;
               return (
                 <Link
                   key={itemKey}
