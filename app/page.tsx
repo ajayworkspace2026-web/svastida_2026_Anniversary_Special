@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AtelierHeroLoader from "@/components/AtelierHeroLoader";
+import AtelierHero from "@/components/AtelierHero";
 import StorefrontNav from "@/components/StorefrontNav";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
@@ -19,7 +19,7 @@ export default async function HomePage() {
   return (
     <>
       <StorefrontNav immersive />
-      <AtelierHeroLoader />
+      <AtelierHero />
 
       <main>
         <section id="collections" className="px-5 py-24 md:px-10">
