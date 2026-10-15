@@ -2,6 +2,7 @@ import Link from "next/link";
 import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
 import SectionHeading from "@/components/SectionHeading";
+import AtelierCollectionGrid from "@/components/AtelierCollectionGrid";
 import { getCollections } from "@/lib/storefront";
 
 export default async function CollectionsPage() {
@@ -13,11 +14,17 @@ export default async function CollectionsPage() {
       <main>
         <section className="border-b border-black/10 px-5 py-20 md:px-10 md:py-28">
           <div className="mx-auto max-w-7xl">
-            <SectionHeading
-              eyebrow="The edit"
-              title="Find your next favourite."
-              description="Collections are published and ordered from the admin panel."
-            />
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--gold)]">The digital wardrobe</p>
+              <h1 className="mt-5 text-7xl leading-[0.82] tracking-[-0.04em] md:text-[8rem]">
+                Find your next
+                <br />
+                <span className="text-[#b89548]">favourite.</span>
+              </h1>
+              <p className="mt-7 max-w-2xl text-sm leading-7 text-black/50 md:text-base">
+                Enter an immersive catalogue built around silhouette, fabric, fit, and the freedom to make each piece your own.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -28,22 +35,7 @@ export default async function CollectionsPage() {
               <p className="mt-2 text-sm text-black/45">Once the admin publishes a collection, it will appear here automatically.</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {collections.map((collection) => (
-                <Link
-                  key={collection.id}
-                  href={`/collections/${collection.slug}`}
-                  className="group relative min-h-96 overflow-hidden bg-black"
-                >
-                  {collection.image_url ? (
-                    <img src={collection.image_url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-85" />
-                  ) : null}
-                  <div className="absolute inset-0 bg-black/40" />
-                  <div className="relative flex min-h-96 flex-col justify-end p-7 text-white">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[var(--gold-bright)]">Collection</p>
-                    <h2 className="mt-2 text-5xl capitalize leading-none">{collection.name}</h2>
-                    {collection.description ? <p className="mt-3 max-w-sm text-sm text-white/65">{collection.description}</p> : null}
-                  </div>
+            <AtelierCollectionGrid collections={collections} />
                 </Link>
               ))}
             </div>
