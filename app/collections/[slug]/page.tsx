@@ -54,15 +54,25 @@ export default async function CollectionPage({
     <>
       <StorefrontNav />
       <main className="mx-auto max-w-7xl px-5 py-16 md:px-10 md:py-24">
-        <div className="flex flex-col justify-between gap-6 border-b border-black/10 pb-10 md:flex-row md:items-end">
+        <div className="grid gap-8 border-b border-black/10 pb-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
           <SectionHeading
             eyebrow="Collection"
             title={collection.name}
             description={collection.description ?? undefined}
           />
-          <Link href="/collections" className="text-sm font-medium underline decoration-[var(--gold)] underline-offset-8">
-            All collections
-          </Link>
+          <div className="relative min-h-[300px] overflow-hidden rounded-[1.75rem] bg-[#141414]">
+            {collection.image_url ? (
+              <img
+                src={collection.image_url}
+                alt={collection.name}
+                className="absolute inset-0 h-full w-full object-cover opacity-85"
+              />
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+            <div className="absolute bottom-5 left-5 rounded-full border border-white/15 bg-black/20 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white/65 backdrop-blur-md">
+              Collection story
+            </div>
+          </div>
         </div>
 
         <form className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.3fr_0.65fr_0.65fr_180px_90px]">
