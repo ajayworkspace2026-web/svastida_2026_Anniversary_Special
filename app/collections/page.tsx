@@ -1,7 +1,5 @@
-import Link from "next/link";
 import StorefrontNav from "@/components/StorefrontNav";
 import StorefrontFooter from "@/components/StorefrontFooter";
-import SectionHeading from "@/components/SectionHeading";
 import AtelierCollectionGrid from "@/components/AtelierCollectionGrid";
 import { getCollections } from "@/lib/storefront";
 
@@ -36,9 +34,6 @@ export default async function CollectionsPage() {
             </div>
           ) : (
             <AtelierCollectionGrid collections={collections} />
-                </Link>
-              ))}
-            </div>
           )}
         </section>
       </main>
