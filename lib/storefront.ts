@@ -123,6 +123,7 @@ export type CollectionSummary = {
 export async function getCollections() {
   const rows = await rest<Array<CollectionSummary & { image_url: string | null }>>(
     "collections?select=id,name,slug,description,image_url&is_active=eq.true&order=sort_order.asc",
+    0,
   );
   return rows ?? [];
 }
