@@ -11,6 +11,7 @@ type Collection = {
   description: string | null;
   is_active: boolean;
   sort_order: number;
+  image_url: string | null;
 };
 
 const blank = { id: "", name: "", slug: "", description: "", sortOrder: "0", isActive: true };
@@ -25,7 +26,7 @@ export default function CollectionManager() {
   const load = useCallback(async () => {
     const { data } = await supabase
       .from("collections")
-      .select("id,name,slug,description,is_active,sort_order")
+      .select("id,name,slug,description,is_active,sort_order,image_url")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
     setRows((data ?? []) as Collection[]);
@@ -99,6 +100,17 @@ export default function CollectionManager() {
           <label className="block text-sm">Collection image
             <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={(e) => setImage(e.target.files?.[0] ?? null)} className="mt-2 block w-full rounded-xl border border-dashed border-black/15 px-4 py-4 text-sm" />
           </label>
+          {image ? (
+            <div className="overflow-hidden rounded-xl border border-black/10 bg-[#f7f5f0]">
+              <img src={URL.createObjectURL(image)} alt="New collection preview" className="aspect-[16/9] w-full object-cover" />
+            </div>
+          ) : form.id ? (
+            rows.find((row) => row.id === form.id)?.image_url ? (
+              <div className="overflow-hidden rounded-xl border border-black/10 bg-[#f7f5f0]">
+                <img src={rows.find((row) => row.id === form.id)?.image_url ?? ""} alt="Current collection image" className="aspect-[16/9] w-full object-cover" />
+              </div>
+            ) : null
+          ) : null}
           <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} /> Visible on storefront</label>
         </div>
         {message ? <p className="mt-5 rounded-xl bg-[#f7f5f0] px-4 py-3 text-sm">{message}</p> : null}
@@ -115,6 +127,7 @@ export default function CollectionManager() {
           {rows.map((row) => (
             <div key={row.id} className="flex items-center justify-between gap-4 p-5">
               <div>
+                {row.image_url ? <img src={row.image_url} alt="" className="mb-3 h-20 w-20 rounded-xl object-cover" /> : null}
                 <p className="display-font text-2xl">{row.name}</p>
                 <p className="mt-1 text-xs text-black/40">{row.slug} · order {row.sort_order}</p>
               </div>
