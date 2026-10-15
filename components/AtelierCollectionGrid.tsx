@@ -24,11 +24,11 @@ export default function AtelierCollectionGrid({ collections }: { collections: Co
               src={collection.image_url}
               alt=""
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover opacity-50 transition duration-700 group-hover:scale-105 group-hover:opacity-65"
+              className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-90"
             />
           ) : null}
 
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.75))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.72))]" />
           <div className="absolute inset-8 rounded-[50%] border border-white/10 bg-white/[0.03] transition duration-700 group-hover:rotate-y-[-7deg] group-hover:rotate-x-[2deg]" />
 
           <div className="absolute left-1/2 top-[17%] h-[48%] w-[48%] -translate-x-1/2 transition duration-700 group-hover:-translate-y-2 group-hover:scale-[1.04]">
