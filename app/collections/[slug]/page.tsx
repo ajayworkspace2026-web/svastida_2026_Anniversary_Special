@@ -7,6 +7,8 @@ import SectionHeading from "@/components/SectionHeading";
 import Pagination from "@/components/Pagination";
 import { getCollectionProducts, getCollections } from "@/lib/storefront";
 
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   const collections = await getCollections();
   return collections.map((collection) => ({ slug: collection.slug }));
@@ -85,7 +87,6 @@ export default async function CollectionPage({
               defaultValue={query.sort ?? ""}
               aria-label="Sort products"
               className="rounded-full border border-black/15 bg-white px-4 py-2 text-xs"
-              onChange={(event) => event.currentTarget.form?.submit()}
             >
             <option value="">Newest</option>
             <option value="price-asc">Price: low to high</option>
